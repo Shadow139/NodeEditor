@@ -13,6 +13,8 @@ public class NodeWorkView : ViewBaseClass
     private Vector2 mousePos;
     protected NodeBase NodeToDelete;
 
+    //float panX = Screen.width / 2 - 5000; // to start in the Middle of your work area and not the left upper corner(0,0)
+    //float panY = Screen.height / 2 - 5000;
     float panX = 0;
     float panY = 0;
     #endregion

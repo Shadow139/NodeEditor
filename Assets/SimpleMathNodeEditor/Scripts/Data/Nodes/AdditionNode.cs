@@ -10,16 +10,15 @@ public class AdditionNode : NodeBase
 {
     public float nodeSum;
     public NodeOutput output;
-    public NodeInput inputOne;
-    public NodeInput inputTwo;
 
+    private bool multiInput = false;
     private GUIStyle labelGuiStyle = new GUIStyle();
 
     public AdditionNode()
     {
         output = new NodeOutput();
-        inputOne = new NodeInput();
-        inputTwo = new NodeInput();
+        nodeInputs.Add(new NodeInput());
+        nodeInputs.Add(new NodeInput());
 
         labelGuiStyle.fontSize = 16;
         labelGuiStyle.normal.textColor = Color.white;
@@ -30,7 +29,7 @@ public class AdditionNode : NodeBase
     {
         base.InitNode();
         nodeType = NodeType.Addition;
-        nodeRect = new Rect(10f, 10f, 200f, 75f);
+        nodeRect = new Rect(10f, 10f, 160f, 100f);
     }
 
     public override void UpdateNode(Event e, Rect viewRect)
@@ -44,8 +43,6 @@ public class AdditionNode : NodeBase
     {
         base.UpdateNodeGUI(e, viewRect, guiSkin);
 
-        GUILayout.Space(40f);
-
         GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 12f, nodeRect.y + nodeRect.height * 0.5f - 6f, nodeRect.width * 0.5f - 12f, 24f), nodeSum.ToString(), labelGuiStyle);
 
         // Output
@@ -58,34 +55,45 @@ public class AdditionNode : NodeBase
             }
         }
 
-        // Input 1
-        if (GUI.Button(new Rect(nodeRect.x - 12f, nodeRect.y + (nodeRect.height * 0.33f) * 2f - 8f, 24f, 24f), "", guiSkin.GetStyle("node_input")))
+        if (multiInput)
         {
-            if (parentGraph != null)
+            if (GUI.Button(new Rect(nodeRect.x - 12f, nodeRect.y + (nodeRect.height * 0.33f) - 12f, 24f, 48f), "", guiSkin.GetStyle("node_input")))
             {
-                inputOne.inputNode = parentGraph.connectionNode;
-                inputOne.isOccupied = inputOne.inputNode != null;
+                for (int i = 0; i < nodeInputs.Count; i++)
+                {
+                    if (parentGraph != null)
+                    {
+                        nodeInputs[i].inputNode = parentGraph.connectionNode;
+                        nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
 
-                parentGraph.wantsConnection = false;
-                parentGraph.connectionNode = null;
+                        parentGraph.wantsConnection = false;
+                        parentGraph.connectionNode = null;
+                        Debug.Log("Connected");
+                    }
+                }
+            }
+        }
+        else
+        {
+            //Input
+            for (int i = 0; i < nodeInputs.Count; i++)
+            {
+                if (GUI.Button(new Rect(nodeRect.x - 12f, nodeRect.y + (nodeRect.height * 0.33f) * (i + 1) - 12f, 24f, 24f), "", guiSkin.GetStyle("node_input")))
+                {
+                    if (parentGraph != null)
+                    {
+                        nodeInputs[i].inputNode = parentGraph.connectionNode;
+                        nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
 
-                EditorUtility.SetDirty(this);
+                        parentGraph.wantsConnection = false;
+                        parentGraph.connectionNode = null;
+                        Debug.Log("Connected");
+                    }
+                }
             }
         }
 
-        // Input 2
-        if (GUI.Button(new Rect(nodeRect.x - 12f, nodeRect.y + (nodeRect.height * 0.33f) - 14f, 24f, 24f), "", guiSkin.GetStyle("node_input")))
-        {
-            if (parentGraph != null)
-            {
-                inputTwo.inputNode = parentGraph.connectionNode;
-                inputTwo.isOccupied = inputTwo.inputNode != null;
-
-                parentGraph.wantsConnection = false;
-                parentGraph.connectionNode = null;
-            }
-        }
-        ProcessNodeFunctionality();
+        evaluateNode();
         DrawInputLines();
     }
 
@@ -95,25 +103,19 @@ public class AdditionNode : NodeBase
 
         Handles.color = Color.white;
 
-        if (inputOne.inputNode != null && inputOne.isOccupied)
+        for (int i = 0; i < nodeInputs.Count; i++)
         {
-            DrawNodeConnection(inputOne, 2f);
+            if (nodeInputs[i].inputNode != null && nodeInputs[i].isOccupied)
+            {
+                DrawNodeConnection(nodeInputs[i], (float) (i + 1));
+            }
+            else
+            {
+                nodeInputs[i] = new NodeInput();
+            }
         }
-        else
-        {
-            inputOne = new NodeInput();
-        }
-
-        if (inputTwo.inputNode != null && inputTwo.isOccupied)
-        {
-            DrawNodeConnection(inputTwo, 1f);
-        }
-        else
-        {
-            inputTwo = new NodeInput();
-        } 
-
-        Handles.EndGUI();
+        
+            Handles.EndGUI();
     }
 
     private void DrawNodeConnection(NodeInput currentInput, float inputId)
@@ -130,32 +132,24 @@ public class AdditionNode : NodeBase
     }
 
 
-    private void ProcessNodeFunctionality()
+    public override void evaluateNode()
     {
-        if (inputOne.isOccupied && inputTwo.isOccupied)
+        if (nodeInputs[0].isOccupied)
         {
-            float one = 0;
-            float two = 0;
-
-            if (inputOne.inputNode.GetType() == typeof(FloatNode))
-            {
-                one = ((FloatNode)inputOne.inputNode).nodeValue;
-            }
-            else if (inputOne.inputNode.GetType() == typeof(AdditionNode))
-            {
-                one = ((AdditionNode)inputOne.inputNode).nodeSum;
-            }
-
-            if (inputTwo.inputNode.GetType() == typeof(FloatNode))
-            {
-                two = ((FloatNode)inputTwo.inputNode).nodeValue;
-            }
-            else if (inputTwo.inputNode.GetType() == typeof(AdditionNode))
-            {
-                two = ((AdditionNode)inputTwo.inputNode).nodeSum;
+            float tempSum = 0;
+            for (int i = 0; i < nodeInputs.Count; i++)
+            {                 
+                if (nodeInputs[i].inputNode.GetType() == typeof(FloatNode))
+                {
+                    tempSum += ((FloatNode)nodeInputs[i].inputNode).nodeValue;
+                }
+                else if (nodeInputs[i].inputNode.GetType() == typeof(AdditionNode))
+                {
+                    tempSum += ((AdditionNode)nodeInputs[i].inputNode).nodeSum;
+                }
             }
 
-            nodeSum = one + two;
+            nodeSum = tempSum;
         }
     }
 
@@ -163,7 +157,7 @@ public class AdditionNode : NodeBase
     {
         base.DrawNodeProperties(viewRect, guiSkin);
         
-        if (inputOne.isOccupied && inputTwo.isOccupied)
+        if (nodeInputs[0].isOccupied)
         {
             EditorGUILayout.LabelField("Value :", nodeSum.ToString("F"));
         }

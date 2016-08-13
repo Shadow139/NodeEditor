@@ -42,17 +42,17 @@ public class NodeWorkView : ViewBaseClass
         // Testing Group with some test values 
         //TODO Update and improve Performance 
         GUI.BeginGroup(new Rect(panX, panY, 10000, 10000));
-        GUI.Box(new Rect(0, 0, 10000, 10000), viewTitle, viewSkin.GetStyle("bg_view"));
+        GUI.Box(viewRect, viewTitle, viewSkin.GetStyle("bg_view"));
 
         //Draw a Grid
-        NodeUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), 60f, 0.15f, Color.black);
-        NodeUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), 20f, 0.05f, Color.black);
+        NodeUtilities.DrawGrid(viewRect, 60f, 0.15f, Color.black);
+        NodeUtilities.DrawGrid(viewRect, 20f, 0.05f, Color.black);
 
-        GUILayout.BeginArea(new Rect(0, 0, 10000, 10000));
+        GUILayout.BeginArea(viewRect);
 
         if (currentNodeGraph != null)
         {
-            currentNodeGraph.UpdateGraphGUI(e, new Rect(0, 0, 10000, 10000), viewSkin);
+            currentNodeGraph.UpdateGraphGUI(e, viewRect, viewSkin);
         }
 
         GUILayout.EndArea();
@@ -108,7 +108,7 @@ public class NodeWorkView : ViewBaseClass
             {
                 if (e.type == EventType.MouseDrag)
                 {                    
-                    Debug.Log("MiddleMouseDrag in: " + viewTitle);
+                    Debug.Log("MiddleMouseDrag at: " + e.mousePosition);
                     //panX += e.mousePosition.x - mousePos.x;
                     //panY += e.mousePosition.y - mousePos.y;
 
@@ -165,6 +165,8 @@ public class NodeWorkView : ViewBaseClass
                 menu.AddSeparator("");
                 menu.AddItem(new GUIContent("Add Float Node"), false, ContextCallback, "3");
                 menu.AddItem(new GUIContent("Add Addition Node"), false, ContextCallback, "4");
+                menu.AddItem(new GUIContent("Add New Graph Node"), false, ContextCallback, "5");
+                menu.AddItem(new GUIContent("Load Existing Graph Node"), false, ContextCallback, "6");
 
             }
         }
@@ -173,7 +175,7 @@ public class NodeWorkView : ViewBaseClass
         {
             if (currentNodeGraph != null)
             {
-                menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, "5");
+                menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, "7");
             }
 
         }
@@ -187,26 +189,46 @@ public class NodeWorkView : ViewBaseClass
         switch (obj.ToString())
         {
             case "0":
-                Debug.Log("Creating New Graph");
                 NodePopupWindow.InitNodePopup();
+                Debug.Log("Creating New Graph");
                 break;
             case "1":
-                Debug.Log("Loading Graph");
                 NodeUtilities.LoadGraph();
+                Debug.Log("Loading Graph");
                 break;
             case "2":
-                Debug.Log("Unloading Graph");
                 NodeUtilities.UnloadGraph();
+                Debug.Log("Unloading Graph");
                 break;
             case "3":
-                Debug.Log("Float Node added");
                 NodeUtilities.CreateNode(currentNodeGraph, NodeType.Float, mousePos);
+                Debug.Log("Float Node added");
                 break;
             case "4":
-                Debug.Log("Addition Node added");
                 NodeUtilities.CreateNode(currentNodeGraph, NodeType.Addition, mousePos);
+                Debug.Log("Addition Node added");
                 break;
             case "5":
+                if (currentNodeGraph != null)
+                {
+                    NodeBase currentNode = NodeUtilities.CreateNode(NodeType.Graph);
+                    NodeGraphPopupWindow.InitNodePopup(currentNode);
+                    NodeUtilities.initAndSaveNode(currentNode, currentNodeGraph, mousePos);
+                }
+                Debug.Log("New Graph Node added");
+                break;
+            case "6":
+                if (currentNodeGraph != null)
+                {
+                    NodeBase currentNode = NodeUtilities.CreateNode(NodeType.Graph);
+                    NodeGraph graph = NodeUtilities.getSavedNodegraph();
+                    ((GraphNode)currentNode).nodeGraph = graph;
+                    currentNode.nodeName = graph.graphName;
+                    NodeUtilities.initAndSaveNode(currentNode, currentNodeGraph, mousePos);
+                }
+                Debug.Log("Existing Graph Node added");
+                break;
+            case "7":
                 Debug.Log("Deleting Node");
                 NodeUtilities.DeleteNode(NodeToDelete, currentNodeGraph);
                 break;

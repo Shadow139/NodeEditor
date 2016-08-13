@@ -9,8 +9,6 @@ public class NodePropertyView : ViewBaseClass
 {
     // Just for showing stuff
     AnimationCurve curveX = AnimationCurve.Linear(0, 0, 10, 10);
-    AnimationCurve curveY = AnimationCurve.Linear(0, 0, 10, 10);
-    AnimationCurve curveZ = AnimationCurve.Linear(0, 0, 10, 10);
     
     public NodePropertyView() : base("Properties") { }
 
@@ -36,12 +34,6 @@ public class NodePropertyView : ViewBaseClass
             curveX = EditorGUI.CurveField(new
         Rect(3, 100, viewRect.width - 12, 150),
         "X", curveX);
-            curveY = EditorGUI.CurveField(new
-                Rect(3, 275, viewRect.width - 12, 150),
-                "Y", curveY);
-            curveZ = EditorGUI.CurveField(new
-                Rect(3, 450, viewRect.width - 12, 150),
-                "Z", curveZ);
         }
                              
 

@@ -4,5 +4,6 @@ using System.Collections;
 public enum NodeType {
 
     Float,
-    Addition
+    Addition,
+    Graph
 }

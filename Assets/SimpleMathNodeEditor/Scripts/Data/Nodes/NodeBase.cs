@@ -2,6 +2,7 @@
 using UnityEditor;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class NodeBase : ScriptableObject
 {
@@ -10,8 +11,11 @@ public class NodeBase : ScriptableObject
     public NodeGraph parentGraph;
     public NodeType nodeType;
     public bool isSelected { get; set; }
-    public GUISkin nodeSkin { get; set; }
 
+    public List<NodeInput> nodeInputs = new List<NodeInput>();
+    public List<NodeOutput> nodeOutputs = new List<NodeOutput>();
+
+    public GUISkin nodeSkin { get; set; }
 
     [Serializable]
     public class NodeInput
@@ -27,15 +31,16 @@ public class NodeBase : ScriptableObject
         public NodeBase outputNode;
     }
 
-
-    public virtual void InitNode()
-    {
-
-    }
+    public virtual void InitNode() { }
 
     public virtual void UpdateNode(Event e, Rect viewRect)
     {
         ProcessEvents(e, viewRect);
+    }
+
+    public virtual void evaluateNode()
+    {
+
     }
 
     private void ProcessEvents(Event e, Rect viewRect)

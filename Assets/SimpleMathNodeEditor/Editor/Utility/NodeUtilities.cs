@@ -4,11 +4,19 @@ using System.Collections;
 
 public static class NodeUtilities
 {
+
     public static void CreateNewGraph(string wantedName)
     {
-        NodeGraph currentNodeGraph = (NodeGraph) ScriptableObject.CreateInstance<NodeGraph>();
+        NodeGraph currentNodeGraph = CreateAndSaveGraph(wantedName);
 
-        if(currentNodeGraph != null)
+        DisplayGraph(currentNodeGraph);
+    }
+
+    public static NodeGraph CreateAndSaveGraph(string wantedName)
+    {
+        NodeGraph currentNodeGraph = (NodeGraph)ScriptableObject.CreateInstance<NodeGraph>();
+
+        if (currentNodeGraph != null)
         {
             currentNodeGraph.graphName = wantedName;
             currentNodeGraph.InitGraph();
@@ -17,34 +25,28 @@ public static class NodeUtilities
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            NodeEditorWindow currentWindow = (NodeEditorWindow) EditorWindow.GetWindow<NodeEditorWindow>();
-            if(currentWindow != null)
-            {
-                currentWindow.currentNodeGraph = currentNodeGraph;
-            }
+            return currentNodeGraph;
         }
         else
         {
-            EditorUtility.DisplayDialog("Node Message", "Unable to create new graph!", "OK");
+            return null;
         }
     }
 
     public static void LoadGraph()
     {
-        NodeGraph currentGraph = null;
+        NodeGraph currentNodeGraph = null;
 
-        string graphPath = EditorUtility.OpenFilePanel("Load Graph", Application.dataPath + "/SimpleMathNodeEditor/Database/","");
-
-        int pathLength = Application.dataPath.Length;
-
-        string finalPath = graphPath.Substring(pathLength - 6); // remove .asset extension from Path
-
-        currentGraph = (NodeGraph) AssetDatabase.LoadAssetAtPath(finalPath, typeof(NodeGraph));
-
-        if(currentGraph != null)
+        currentNodeGraph = getSavedNodegraph();
+        DisplayGraph(currentNodeGraph);
+    }
+    
+    public static void DisplayGraph(NodeGraph currentGraph)
+    {
+        if (currentGraph != null)
         {
             NodeEditorWindow currentWindow = (NodeEditorWindow)EditorWindow.GetWindow<NodeEditorWindow>();
-            if(currentGraph != null)
+            if (currentGraph != null)
             {
                 currentWindow.currentNodeGraph = currentGraph;
             }
@@ -53,7 +55,19 @@ public static class NodeUtilities
         {
             EditorUtility.DisplayDialog("Node Message", "Unable to load graph!", "OK");
         }
+    }
 
+    public static NodeGraph getSavedNodegraph()
+    {
+        string graphPath = EditorUtility.OpenFilePanel("Load Graph", Application.dataPath + "/SimpleMathNodeEditor/Database/", "");
+
+        Debug.Log(graphPath);
+
+        int pathLength = Application.dataPath.Length;
+
+        string finalPath = graphPath.Substring(pathLength - 6); // remove .asset extension from Path
+
+        return (NodeGraph)AssetDatabase.LoadAssetAtPath(finalPath, typeof(NodeGraph));
     }
 
     public static void UnloadGraph()
@@ -69,33 +83,48 @@ public static class NodeUtilities
     {
         if(currentGraph != null)
         {
-            NodeBase currentNode = null;
-            switch (nodeType)
-            {
-                case NodeType.Float:
-                    currentNode = (FloatNode) ScriptableObject.CreateInstance<FloatNode>();
-                    currentNode.nodeName = "Float";
-                    break;
-                case NodeType.Addition:
-                    currentNode = (AdditionNode)ScriptableObject.CreateInstance<AdditionNode>();
-                    currentNode.nodeName = "Addition";
-                    break;
-                default:
-                    break;
-            }
+            NodeBase currentNode = CreateNode(nodeType);
+            initAndSaveNode(currentNode, currentGraph, mousePos);
+        }
+    }
 
-            if(currentNode != null)
-            {
-                currentNode.InitNode();
-                currentNode.nodeRect.x = mousePos.x;
-                currentNode.nodeRect.y = mousePos.y;
-                currentNode.parentGraph = currentGraph;
-                currentGraph.nodes.Add(currentNode);
+    public static NodeBase CreateNode(NodeType nodeType)
+    {
+        NodeBase currentNode = null;
 
-                AssetDatabase.AddObjectToAsset(currentNode, currentGraph);
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-            }
+        switch (nodeType)
+        {
+            case NodeType.Float:
+                currentNode = (FloatNode)ScriptableObject.CreateInstance<FloatNode>();
+                currentNode.nodeName = "Float";
+                break;
+            case NodeType.Addition:
+                currentNode = (AdditionNode)ScriptableObject.CreateInstance<AdditionNode>();
+                currentNode.nodeName = "Addition";
+                break;
+            case NodeType.Graph:
+                currentNode = (GraphNode)ScriptableObject.CreateInstance<GraphNode>();
+                break;
+            default:
+                break;
+        }
+
+        return currentNode;
+    }
+
+    public static void initAndSaveNode(NodeBase currentNode, NodeGraph currentGraph, Vector2 mousePos)
+    {
+        if (currentNode != null)
+        {
+            currentNode.InitNode();
+            currentNode.nodeRect.x = mousePos.x;
+            currentNode.nodeRect.y = mousePos.y;
+            currentNode.parentGraph = currentGraph;
+            currentGraph.nodes.Add(currentNode);
+
+            AssetDatabase.AddObjectToAsset(currentNode, currentGraph);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
 

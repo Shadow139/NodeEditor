@@ -13,7 +13,7 @@ public class NodePopupWindow : EditorWindow
     public static void InitNodePopup()
     {
         currentNodePopupWindow = (NodePopupWindow) EditorWindow.GetWindow<NodePopupWindow>();
-        currentNodePopupWindow.title = "Node Popup";
+        currentNodePopupWindow.title = "Create a new Graph";
     }
 
     void OnGUI()
@@ -26,7 +26,7 @@ public class NodePopupWindow : EditorWindow
 
         EditorGUILayout.LabelField("Create New Graph", EditorStyles.boldLabel);
 
-        wantedName = EditorGUILayout.TextField("Enter Name: ", wantedName);
+        wantedName = EditorGUILayout.TextField("Enter Graph Name: ", wantedName);
 
         GUILayout.Space(10);
 

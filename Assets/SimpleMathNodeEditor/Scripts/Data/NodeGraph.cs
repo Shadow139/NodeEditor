@@ -24,6 +24,10 @@ public class NodeGraph : ScriptableObject
         {
             nodes = new List<NodeBase>();
         }
+        if(selectedNodes == null)
+        {
+            selectedNodes = new List<NodeBase>();
+        }
     }
 
     public void InitGraph()
@@ -54,12 +58,14 @@ public class NodeGraph : ScriptableObject
                     {
                         if (e.shift)
                         {
+                            selectedNodes.Add(node);
                             selectedNode = node;
                             selectedNode.isSelected = true;
                             break;
                         }
                         else
                         {
+                            selectedNodes.Add(node);
                             selectedNode = node;
                             selectedNode.isSelected = true;
                             break;
@@ -68,8 +74,24 @@ public class NodeGraph : ScriptableObject
                 }
             }
 
+            if(e.keyCode == KeyCode.LeftAlt)
+            {
+                Debug.Log("align Nodes " + selectedNodes.Count);
+                alignNodes();
+            }
+
         }
 
+    }
+
+    private void alignNodes()
+    {
+        float x = selectedNodes[selectedNodes.Count - 1].nodeRect.center.x;
+
+        for(int i = 0; i < selectedNodes.Count; i++)
+        {
+            selectedNodes[i].nodeRect.center = new Vector2(x, selectedNodes[i].nodeRect.center.y);
+        }
     }
 
     private void DeselectAllNodes()

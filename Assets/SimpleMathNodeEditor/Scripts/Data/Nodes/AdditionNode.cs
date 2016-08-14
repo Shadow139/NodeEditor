@@ -9,14 +9,12 @@ using System.Collections;
 public class AdditionNode : NodeBase
 {
     public float nodeSum;
-    public NodeOutput output;
-
     private bool multiInput = false;
     private GUIStyle labelGuiStyle = new GUIStyle();
 
     public AdditionNode()
     {
-        output = new NodeOutput();
+        nodeOutputs.Add(new NodeOutput());
         nodeInputs.Add(new NodeInput());
         nodeInputs.Add(new NodeInput());
 
@@ -45,19 +43,30 @@ public class AdditionNode : NodeBase
 
         GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 12f, nodeRect.y + nodeRect.height * 0.5f - 6f, nodeRect.width * 0.5f - 12f, 24f), nodeSum.ToString(), labelGuiStyle);
 
-        // Output
-        if (GUI.Button(new Rect(nodeRect.x + nodeRect.width - 12f, nodeRect.y + nodeRect.height * 0.5f - 12f, 24f, 24f), "", guiSkin.GetStyle("node_output")))
+        if (Handles.Button(new Vector3(nodeRect.x, nodeRect.y,0f), Quaternion.identity, 1f, 2f, DrawFunc))
         {
-            if (parentGraph != null)
-            {
-                parentGraph.wantsConnection = true;
-                parentGraph.connectionNode = this;
-            }
+            Debug.Log("hello");
         }
 
+        drawOutputHandles(guiSkin);
+        drawInputHandles(guiSkin);
+        
+        evaluateNode();
+        DrawInputLines();
+    }
+
+    void DrawFunc(int controlId, Vector3 position, Quaternion rotation,float size)
+    //Draw the button
+    {
+        //You can draw other stuff than cube, but i havent found something better as a "Button" than cube
+        Handles.DrawCube(controlId, position, rotation, size);
+    }
+
+    public void drawInputHandles(GUISkin guiSkin)
+    {
         if (multiInput)
         {
-            if (GUI.Button(new Rect(nodeRect.x - 12f, nodeRect.y + (nodeRect.height * 0.33f) - 12f, 24f, 48f), "", guiSkin.GetStyle("node_input")))
+            if (GUI.Button(new Rect(nodeRect.x - 20f, nodeRect.y + (nodeRect.height * 0.5f) - 25f, 20f, 50f), "", guiSkin.GetStyle("node_multiInput")))
             {
                 for (int i = 0; i < nodeInputs.Count; i++)
                 {
@@ -92,9 +101,19 @@ public class AdditionNode : NodeBase
                 }
             }
         }
+    }
 
-        evaluateNode();
-        DrawInputLines();
+    public void drawOutputHandles(GUISkin guiSkin)
+    {
+        // Output
+        if (GUI.Button(new Rect(nodeRect.x + nodeRect.width - 12f, nodeRect.y + nodeRect.height * 0.5f - 12f, 24f, 24f), "", guiSkin.GetStyle("node_output")))
+        {
+            if (parentGraph != null)
+            {
+                parentGraph.wantsConnection = true;
+                parentGraph.connectionNode = this;
+            }
+        }
     }
 
     private void DrawInputLines()
@@ -121,6 +140,7 @@ public class AdditionNode : NodeBase
     private void DrawNodeConnection(NodeInput currentInput, float inputId)
     {
         DrawUtilities.DrawNodeCurve(currentInput.inputNode.nodeRect, nodeRect, inputId);
+        //DrawLine(currentInput, inputId);
     }
 
     private void DrawLine(NodeInput currentInput, float inputId)
@@ -134,7 +154,7 @@ public class AdditionNode : NodeBase
 
     public override void evaluateNode()
     {
-        if (nodeInputs[0].isOccupied)
+        if (nodeInputs[0].isOccupied && nodeInputs[1].isOccupied)
         {
             float tempSum = 0;
             for (int i = 0; i < nodeInputs.Count; i++)
@@ -148,7 +168,6 @@ public class AdditionNode : NodeBase
                     tempSum += ((AdditionNode)nodeInputs[i].inputNode).nodeSum;
                 }
             }
-
             nodeSum = tempSum;
         }
     }
@@ -156,11 +175,18 @@ public class AdditionNode : NodeBase
     public override void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
     {
         base.DrawNodeProperties(viewRect, guiSkin);
-        
+
+        GUILayout.Space(20);
+
+        GUILayout.BeginVertical();
+        multiInput = EditorGUILayout.Toggle("Multi Input", multiInput);
+
         if (nodeInputs[0].isOccupied)
         {
             EditorGUILayout.LabelField("Value :", nodeSum.ToString("F"));
         }
+
+        GUILayout.EndHorizontal();
     }
 
 #endif

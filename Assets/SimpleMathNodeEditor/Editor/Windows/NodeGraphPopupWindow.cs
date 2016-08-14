@@ -7,13 +7,15 @@ public class NodeGraphPopupWindow : EditorWindow
     #region Variables
     private static NodeGraphPopupWindow currentNodePopupWindow;
     private NodeBase node;
+    private NodeGraph graph;
     private string wantedName = "Enter a name...";
     #endregion
 
-    public static void InitNodePopup(NodeBase node)
+    public static void InitNodePopup(NodeBase node, NodeGraph graph)
     {
         currentNodePopupWindow = (NodeGraphPopupWindow)EditorWindow.GetWindow<NodeGraphPopupWindow>();
         currentNodePopupWindow.node = node;
+        currentNodePopupWindow.graph = graph;
         currentNodePopupWindow.title = "Create a new GraphNode";
     }
 
@@ -49,6 +51,7 @@ public class NodeGraphPopupWindow : EditorWindow
         }
         if (GUILayout.Button("Cancel", GUILayout.Height(40)))
         {
+            NodeUtilities.DeleteNode(node, graph);
             currentNodePopupWindow.Close();
         }
         GUILayout.EndHorizontal();

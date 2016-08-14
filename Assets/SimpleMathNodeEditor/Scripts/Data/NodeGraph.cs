@@ -12,6 +12,7 @@ public class NodeGraph : ScriptableObject
 {
     public string graphName = "New Graph";
     public List<NodeBase> nodes;
+    public List<NodeBase> selectedNodes;
     public NodeBase selectedNode;
     public bool showProperties;
     public bool wantsConnection;
@@ -51,9 +52,16 @@ public class NodeGraph : ScriptableObject
                 {
                     if (node.nodeRect.Contains(e.mousePosition))
                     {
-                        selectedNode = node;
-                        selectedNode.isSelected = true;
-                        break;
+                        if (e.shift)
+                        {
+
+                        }
+                        else
+                        {
+                            selectedNode = node;
+                            selectedNode.isSelected = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -74,6 +82,9 @@ public class NodeGraph : ScriptableObject
 #if UNITY_EDITOR
     public void UpdateGraphGUI(Event e, Rect viewRect, GUISkin guiSkin)
     {
+        //DebugUtilities.drawWindowOutline(viewRect, Color.green);
+        //Debug.Log("GraphView Position: " + viewRect.ToString());
+
         if (nodes.Count > 0)
         {
             ProcessEvents(e, viewRect);
@@ -109,15 +120,6 @@ public class NodeGraph : ScriptableObject
     private void DrawConnectionToMouse(Vector2 mousePosition)
     {
         DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition);
-
-        /* Handles.BeginGUI();
-
-         Handles.color = Color.white;
-         Handles.DrawLine(
-             new Vector2(connectionNode.nodeRect.x + connectionNode.nodeRect.width + 12f,
-                 connectionNode.nodeRect.y + connectionNode.nodeRect.height * 0.5f), mousePosition);
-
-        Handles.EndGUI();*/
     }
 #endif
 }

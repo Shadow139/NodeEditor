@@ -44,6 +44,9 @@ public class NodeWorkView : ViewBaseClass
         GUI.BeginGroup(new Rect(panX, panY, 10000, 10000));
         GUI.Box(viewRect, viewTitle, viewSkin.GetStyle("bg_view"));
 
+        //DebugUtilities.drawWindowOutline(viewRect, Color.green);
+        //Debug.Log(viewTitle + " Position: " + viewRect.ToString());
+
         //Draw a Grid
         NodeUtilities.DrawGrid(viewRect, 60f, 0.15f, Color.black);
         NodeUtilities.DrawGrid(viewRect, 20f, 0.05f, Color.black);
@@ -109,33 +112,10 @@ public class NodeWorkView : ViewBaseClass
                 if (e.type == EventType.MouseDrag)
                 {                    
                     Debug.Log("MiddleMouseDrag at: " + e.mousePosition);
-                    //panX += e.mousePosition.x - mousePos.x;
-                    //panY += e.mousePosition.y - mousePos.y;
-
-                    //mousePos = e.mousePosition;
+                    panX += e.delta.x;
+                    panY += e.delta.y;
                 }
             }
-        }
-
-        if (e.keyCode == KeyCode.UpArrow)
-        {
-            Debug.Log("UpArrow: " + panY);
-            panY += 10;
-        }
-        if (e.keyCode == KeyCode.DownArrow)
-        {
-            Debug.Log("DownArrow: " + panY);
-            panY -= 10;
-        }
-        if (e.keyCode == KeyCode.LeftArrow)
-        {
-            Debug.Log("LeftArrow: " + panX);
-            panX += 10;
-        }
-        if (e.keyCode == KeyCode.RightArrow)
-        {
-            Debug.Log("RightArrow: " + panX);
-            panX -= 10;
         }
 
         if (panX > 0)
@@ -175,7 +155,12 @@ public class NodeWorkView : ViewBaseClass
         {
             if (currentNodeGraph != null)
             {
-                menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, "7");
+                menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, "20");
+                if(NodeToDelete.nodeType == NodeType.Graph)
+                {
+                    menu.AddItem(new GUIContent("Step into NodeGraph"), false, ContextCallback, "21");
+                }
+
             }
 
         }
@@ -212,7 +197,7 @@ public class NodeWorkView : ViewBaseClass
                 if (currentNodeGraph != null)
                 {
                     NodeBase currentNode = NodeUtilities.CreateNode(NodeType.Graph);
-                    NodeGraphPopupWindow.InitNodePopup(currentNode);
+                    NodeGraphPopupWindow.InitNodePopup(currentNode, currentNodeGraph);
                     NodeUtilities.initAndSaveNode(currentNode, currentNodeGraph, mousePos);
                 }
                 Debug.Log("New Graph Node added");
@@ -228,9 +213,14 @@ public class NodeWorkView : ViewBaseClass
                 }
                 Debug.Log("Existing Graph Node added");
                 break;
-            case "7":
+            case "20":
                 Debug.Log("Deleting Node");
                 NodeUtilities.DeleteNode(NodeToDelete, currentNodeGraph);
+                break;
+            case "21":
+                //step into the GraphNode
+                NodeUtilities.DisplayGraph(((GraphNode)NodeToDelete).nodeGraph);
+                Debug.Log("Stepping into NodeGraph");
                 break;
             default:
                 break;

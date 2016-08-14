@@ -18,24 +18,26 @@ public class NodePropertyView : ViewBaseClass
         GUI.Box(viewRect, viewTitle, viewSkin.GetStyle("bg_view"));
 
         GUILayout.BeginArea(viewRect);
-
+        
         GUILayout.Space(30f);
         GUILayout.BeginHorizontal();
         GUILayout.Space(30f);
 
         if (currentNodeGraph == null || !currentNodeGraph.showProperties)
         {
-            //EditorGUILayout.LabelField("");
+            //Draw Properties when nothing is selected
         }
         else
         {
-            currentNodeGraph.selectedNode.DrawNodeProperties(viewRect, viewSkin);
-
-            curveX = EditorGUI.CurveField(new
-        Rect(3, 100, viewRect.width - 12, 150),
-        "X", curveX);
+            if(currentNodeGraph.selectedNode != null)
+            {
+                currentNodeGraph.selectedNode.DrawNodeProperties(viewRect, viewSkin);
+            }
+            curveX = EditorGUI.CurveField(new Rect(10, 100, viewRect.width - 20, 250), curveX);
         }
-                             
+
+        //DebugUtilities.drawWindowOutline(editorRect, Color.blue);
+        //Debug.Log(viewTitle + " Position: " + viewRect.ToString());
 
         GUILayout.EndHorizontal();
 

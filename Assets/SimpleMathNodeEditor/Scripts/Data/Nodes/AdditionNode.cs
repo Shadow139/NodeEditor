@@ -10,6 +10,7 @@ public class AdditionNode : NodeBase
 {
     public float nodeSum;
     private bool multiInput = false;
+    private int numberOfInputs = 2;
     private GUIStyle labelGuiStyle = new GUIStyle();
 
     public AdditionNode()
@@ -41,7 +42,9 @@ public class AdditionNode : NodeBase
     {
         base.UpdateNodeGUI(e, viewRect, guiSkin);
 
-        GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 12f, nodeRect.y + nodeRect.height * 0.5f - 6f, nodeRect.width * 0.5f - 12f, 24f), nodeSum.ToString(), labelGuiStyle);
+        GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.5f - 10f, 20f), nodeSum.ToString(), labelGuiStyle);
+        GUI.Label(new Rect(nodeRect.x + 14f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeInputs.Count + "", labelGuiStyle);
+
 
         if (Handles.Button(new Vector3(nodeRect.x, nodeRect.y,0f), Quaternion.identity, 1f, 2f, DrawFunc))
         {
@@ -50,7 +53,16 @@ public class AdditionNode : NodeBase
 
         drawOutputHandles(guiSkin);
         drawInputHandles(guiSkin);
-        
+
+        if (!multiInput)
+        {
+            nodeRect.height = 40f + (30f * nodeInputs.Count);
+        }
+        else
+        {
+            nodeRect.height = 100f;
+        }
+
         evaluateNode();
         DrawInputLines();
     }
@@ -65,29 +77,46 @@ public class AdditionNode : NodeBase
     public void drawInputHandles(GUISkin guiSkin)
     {
         if (multiInput)
-        {
-            if (GUI.Button(new Rect(nodeRect.x - 20f, nodeRect.y + (nodeRect.height * 0.5f) - 25f, 20f, 50f), "", guiSkin.GetStyle("node_multiInput")))
-            {
+        {   
+            //Multi Input Box
+            if (GUI.Button(new Rect(nodeRect.x - 16f, nodeRect.y + (nodeRect.height * 0.5f) - 30f, 16f, 60f), "", guiSkin.GetStyle("node_multiInput")))
+            {            
                 for (int i = 0; i < nodeInputs.Count; i++)
                 {
                     if (parentGraph != null)
                     {
-                        nodeInputs[i].inputNode = parentGraph.connectionNode;
-                        nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
+                        if(nodeInputs[i].inputNode == null)
+                        {
+                            nodeInputs[i].inputNode = parentGraph.connectionNode;
+                            nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
 
-                        parentGraph.wantsConnection = false;
-                        parentGraph.connectionNode = null;
-                        Debug.Log("Connected");
+                            parentGraph.wantsConnection = false;
+                            parentGraph.connectionNode = null;
+                            Debug.Log("Connected");
+                        }
+                        else
+                        {
+                            if (parentGraph.wantsConnection)
+                            {
+                                nodeInputs.Add(new NodeInput());
+                                nodeInputs[i++].inputNode = parentGraph.connectionNode;
+                                nodeInputs[i++].isOccupied = nodeInputs[i++].inputNode != null;
+
+                                parentGraph.wantsConnection = false;
+                                parentGraph.connectionNode = null;
+                                Debug.Log("Added NodeInput and Connected");
+                            }
+                        }
                     }
                 }
             }
         }
         else
         {
-            //Input
+            //Single Input Circles
             for (int i = 0; i < nodeInputs.Count; i++)
             {
-                if (GUI.Button(new Rect(nodeRect.x - 12f, nodeRect.y + (nodeRect.height * 0.33f) * (i + 1) - 12f, 24f, 24f), "", guiSkin.GetStyle("node_input")))
+                if (GUI.Button(new Rect(nodeRect.x - 10f, nodeRect.y + (nodeRect.height * (1f/(nodeInputs.Count + 1))) * (i + 1) - 10f, 20f, 20f), "", guiSkin.GetStyle("node_input")))
                 {
                     if (parentGraph != null)
                     {
@@ -106,7 +135,7 @@ public class AdditionNode : NodeBase
     public void drawOutputHandles(GUISkin guiSkin)
     {
         // Output
-        if (GUI.Button(new Rect(nodeRect.x + nodeRect.width - 12f, nodeRect.y + nodeRect.height * 0.5f - 12f, 24f, 24f), "", guiSkin.GetStyle("node_output")))
+        if (GUI.Button(new Rect(nodeRect.x + nodeRect.width - 10f, nodeRect.y + nodeRect.height * 0.5f - 10f, 20f, 20f), "", guiSkin.GetStyle("node_output")))
         {
             if (parentGraph != null)
             {
@@ -139,26 +168,34 @@ public class AdditionNode : NodeBase
 
     private void DrawNodeConnection(NodeInput currentInput, float inputId)
     {
-        DrawUtilities.DrawNodeCurve(currentInput.inputNode.nodeRect, nodeRect, inputId);
+        if (!multiInput)
+        {
+            DrawUtilities.DrawNodeCurve(currentInput.inputNode.nodeRect, nodeRect, inputId, nodeInputs.Count);
+        }
+        else
+        {
+            DrawUtilities.DrawMultiInputNodeCurve(currentInput.inputNode.nodeRect, nodeRect, 1);
+        }
+
         //DrawLine(currentInput, inputId);
     }
 
     private void DrawLine(NodeInput currentInput, float inputId)
     {
         Handles.DrawLine(new Vector3(
-            currentInput.inputNode.nodeRect.x + currentInput.inputNode.nodeRect.width + 12f,
+            currentInput.inputNode.nodeRect.x + currentInput.inputNode.nodeRect.width + 10f,
             currentInput.inputNode.nodeRect.y + currentInput.inputNode.nodeRect.height * 0.5f, 0f),
-            new Vector3(nodeRect.x - 12f, nodeRect.y + (nodeRect.height * 0.33f) * inputId, 0f));
+            new Vector3(nodeRect.x - 10f, nodeRect.y + (nodeRect.height * 0.33f) * inputId, 0f));
     }
 
 
     public override void evaluateNode()
     {
-        if (nodeInputs[0].isOccupied && nodeInputs[1].isOccupied)
+        float tempSum = 0;
+        for (int i = 0; i < nodeInputs.Count; i++)
         {
-            float tempSum = 0;
-            for (int i = 0; i < nodeInputs.Count; i++)
-            {                 
+            if (nodeInputs[i].isOccupied && nodeInputs[i].inputNode != null)
+            {
                 if (nodeInputs[i].inputNode.GetType() == typeof(FloatNode))
                 {
                     tempSum += ((FloatNode)nodeInputs[i].inputNode).nodeValue;
@@ -167,9 +204,9 @@ public class AdditionNode : NodeBase
                 {
                     tempSum += ((AdditionNode)nodeInputs[i].inputNode).nodeSum;
                 }
-            }
-            nodeSum = tempSum;
+            }  
         }
+        nodeSum = tempSum;
     }
 
     public override void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
@@ -179,16 +216,50 @@ public class AdditionNode : NodeBase
         GUILayout.Space(20);
 
         GUILayout.BeginVertical();
-        multiInput = EditorGUILayout.Toggle("Multi Input", multiInput);
 
         if (nodeInputs[0].isOccupied)
         {
             EditorGUILayout.LabelField("Value :", nodeSum.ToString("F"));
         }
 
+        GUILayout.Space(10);
+
+        multiInput = EditorGUILayout.Toggle("Multi Input", multiInput);
+
+        GUILayout.Space(10);
+
+        if (!multiInput)
+        {
+            numberOfInputs = EditorGUILayout.IntField("Number of InputHandles", nodeInputs.Count, guiSkin.GetStyle("property_view"));
+
+            resizeInputHandles(numberOfInputs);
+            //TODO Resize the InputHandlesList
+        }
+
         GUILayout.EndHorizontal();
     }
 
 #endif
+
+    private void resizeInputHandles(int size)
+    {
+        if(nodeInputs.Count > size)
+        {
+            for (int i = 0; i < nodeInputs.Count; i++)
+            {
+                if(i >= size)
+                {
+                    nodeInputs.RemoveAt(i);
+                }
+            }
+        }else if(nodeInputs.Count < size)
+        {
+            int numberOfInputsToAdd = size - nodeInputs.Count;
+            for (int i = 0; i < numberOfInputsToAdd; i++)
+            {
+                nodeInputs.Add(new NodeInput());
+            }
+        }
+    }
 
 }

@@ -21,7 +21,6 @@ public class NodePropertyView : ViewBaseClass
         
         GUILayout.Space(30f);
         GUILayout.BeginHorizontal();
-        GUILayout.Space(30f);
 
         if (currentNodeGraph == null || !currentNodeGraph.showProperties)
         {
@@ -33,7 +32,7 @@ public class NodePropertyView : ViewBaseClass
             {
                 currentNodeGraph.selectedNode.DrawNodeProperties(viewRect, viewSkin);
             }
-            curveX = EditorGUI.CurveField(new Rect(10, 100, viewRect.width - 20, 250), curveX);
+            curveX = EditorGUI.CurveField(new Rect(10, 250, viewRect.width - 20, 250), curveX);
         }
 
         //DebugUtilities.drawWindowOutline(editorRect, Color.blue);

@@ -43,7 +43,7 @@ public class NodeGraph : ScriptableObject
         {
             if (e.button == 0 && e.type == EventType.MouseDown)
             {
-                if (!wantsConnection)
+                if (!wantsConnection && !e.shift)
                 {
                     DeselectAllNodes();
                 }
@@ -54,7 +54,9 @@ public class NodeGraph : ScriptableObject
                     {
                         if (e.shift)
                         {
-
+                            selectedNode = node;
+                            selectedNode.isSelected = true;
+                            break;
                         }
                         else
                         {
@@ -73,6 +75,7 @@ public class NodeGraph : ScriptableObject
     private void DeselectAllNodes()
     {
         nodes.ForEach(node => node.isSelected = false);
+        selectedNodes.Clear();
         showProperties = false;
         selectedNode = null;
         wantsConnection = false;

@@ -35,14 +35,14 @@ public class FloatNode : NodeBase
     {
         base.UpdateNodeGUI(e, viewRect, guiSkin);
 
-        stringToEdit = GUI.TextField(new Rect(nodeRect.x + nodeRect.width * 0.5f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.4f, 20f), nodeValue.ToString(), 25);
+        stringToEdit = GUI.TextField(new Rect(nodeRect.x + nodeRect.width * 0.5f + 8f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.4f, 20f), nodeValue.ToString(), 25);
 
         try
         {
             nodeValue = float.Parse(stringToEdit); // TODO handle Exception from Bad Input
         }catch(FormatException ex){ }
 
-        if (GUI.Button(new Rect(nodeRect.x + nodeRect.width - 12f, nodeRect.y + nodeRect.height * 0.5f - 12f, 24f, 24f), "", guiSkin.GetStyle("node_output")))
+        if (GUI.Button(new Rect(nodeRect.x + nodeRect.width - 10f, nodeRect.y + nodeRect.height * 0.5f - 10f, 20f, 20f), "", guiSkin.GetStyle("node_output")))
         {
             if (parentGraph != null)
             {

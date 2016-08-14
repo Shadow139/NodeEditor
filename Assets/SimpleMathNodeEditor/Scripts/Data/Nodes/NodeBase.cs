@@ -90,8 +90,11 @@ public class NodeBase : ScriptableObject
         string currentStyle = isSelected ? "node_selected" : "node_default";
         GUI.Box(nodeRect, nodeName, guiSkin.GetStyle(currentStyle));
 
-        if(isSelected)
+        if (isSelected)
+        {
             drawTimelineConnetion(viewRect);
+            GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y - 16f , nodeRect.width * 0.5f, 20f),nodeRect.center.x + "");
+        }
 
         EditorUtility.SetDirty(this);
     }

@@ -12,6 +12,8 @@ public class NodeBase : ScriptableObject
     public NodeType nodeType;
     public bool isSelected { get; set; }
 
+    protected bool multiInput = false;
+
     public List<NodeInput> nodeInputs = new List<NodeInput>();
     public List<NodeOutput> nodeOutputs = new List<NodeOutput>();
 
@@ -78,6 +80,14 @@ public class NodeBase : ScriptableObject
             if (e.keyCode == KeyCode.RightArrow)
             {
                 nodeRect.x += 5;
+            }
+            if (e.keyCode == KeyCode.UpArrow)
+            {
+                nodeRect.y -= 5;
+            }
+            if (e.keyCode == KeyCode.DownArrow)
+            {
+                nodeRect.y += 5;
             }
         }
     }

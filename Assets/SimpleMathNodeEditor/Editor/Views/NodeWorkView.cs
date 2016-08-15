@@ -48,8 +48,8 @@ public class NodeWorkView : ViewBaseClass
         //Debug.Log(viewTitle + " Position: " + viewRect.ToString());
 
         //Draw a Grid
-        NodeUtilities.DrawGrid(viewRect, 60f, 0.15f, Color.black);
-        NodeUtilities.DrawGrid(viewRect, 20f, 0.05f, Color.black);
+        NodeUtilities.DrawGrid(viewRect, EditorPreferences.gridSpacingDark, EditorPreferences.gridColorOuter);
+        NodeUtilities.DrawGrid(viewRect, EditorPreferences.gridSpacingLight, EditorPreferences.gridColorInner);
 
         GUILayout.BeginArea(viewRect);
 

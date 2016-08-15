@@ -140,14 +140,14 @@ public static class NodeUtilities
     }
 
 
-    public static void DrawGrid(Rect viewRect, float gridSpacing, float gridOpacity, Color gridColor)
+    public static void DrawGrid(Rect viewRect, float gridSpacing, Color gridColor)
     {
         int widthDivs = Mathf.CeilToInt(viewRect.width / gridSpacing);
         int heightDivs = Mathf.CeilToInt(viewRect.height / gridSpacing);
 
         Handles.BeginGUI();
 
-        Handles.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridOpacity);
+        Handles.color = gridColor;
 
         for (int x = 0; x < widthDivs; x++)
         {

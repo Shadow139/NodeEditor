@@ -20,11 +20,21 @@ public class NodePropertyView : ViewBaseClass
         GUILayout.BeginArea(viewRect);
         
         GUILayout.Space(30f);
-        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
 
         if (currentNodeGraph == null || !currentNodeGraph.showProperties)
         {
             //Draw Properties when nothing is selected
+            /*
+            EditorPreferences.gridColorOuter = EditorGUILayout.ColorField("Outer Color", EditorPreferences.gridColorOuter);
+            GUILayout.Space(6f);
+            EditorPreferences.gridColorInner = EditorGUILayout.ColorField("Inner Color", EditorPreferences.gridColorInner);
+            GUILayout.Space(6f);
+            EditorPreferences.gridSpacingDark = EditorGUILayout.FloatField("Grid Spacing Outer", EditorPreferences.gridSpacingDark);
+            GUILayout.Space(6f);
+            EditorPreferences.gridSpacingLight = EditorGUILayout.FloatField("Grid Spacing Inner", EditorPreferences.gridSpacingLight);
+            GUILayout.Space(6f);
+            */
         }
         else
         {
@@ -38,7 +48,7 @@ public class NodePropertyView : ViewBaseClass
         //DebugUtilities.drawWindowOutline(editorRect, Color.blue);
         //Debug.Log(viewTitle + " Position: " + viewRect.ToString());
 
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
 
         GUILayout.EndArea();
     }

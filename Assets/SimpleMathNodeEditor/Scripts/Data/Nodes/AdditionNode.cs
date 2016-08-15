@@ -9,7 +9,6 @@ using System.Collections;
 public class AdditionNode : NodeBase
 {
     public float nodeSum;
-    private bool multiInput = false;
     private int numberOfInputs = 2;
     private GUIStyle labelGuiStyle = new GUIStyle();
 
@@ -43,7 +42,8 @@ public class AdditionNode : NodeBase
         base.UpdateNodeGUI(e, viewRect, guiSkin);
 
         GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.5f - 10f, 20f), nodeSum.ToString(), labelGuiStyle);
-        GUI.Label(new Rect(nodeRect.x + 14f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeInputs.Count + "", labelGuiStyle);
+        if(multiInput)
+            GUI.Label(new Rect(nodeRect.x - 14f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeInputs.Count + "", labelGuiStyle);
 
 
         if (Handles.Button(new Vector3(nodeRect.x, nodeRect.y,0f), Quaternion.identity, 1f, 2f, DrawFunc))
@@ -65,6 +65,10 @@ public class AdditionNode : NodeBase
 
         evaluateNode();
         DrawInputLines();
+
+        GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.5f - 10f, 20f), nodeSum.ToString(), labelGuiStyle);
+        if (multiInput)
+            GUI.Label(new Rect(nodeRect.x - 13f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeInputs.Count + "", labelGuiStyle);
     }
 
     void DrawFunc(int controlId, Vector3 position, Quaternion rotation,float size)
@@ -77,36 +81,29 @@ public class AdditionNode : NodeBase
     public void drawInputHandles(GUISkin guiSkin)
     {
         if (multiInput)
-        {   
+        {
             //Multi Input Box
             if (GUI.Button(new Rect(nodeRect.x - 16f, nodeRect.y + (nodeRect.height * 0.5f) - 30f, 16f, 60f), "", guiSkin.GetStyle("node_multiInput")))
-            {            
-                for (int i = 0; i < nodeInputs.Count; i++)
+            {
+
+                if (parentGraph != null)
                 {
-                    if (parentGraph != null)
+                    if (parentGraph.wantsConnection)
                     {
-                        if(nodeInputs[i].inputNode == null)
-                        {
-                            nodeInputs[i].inputNode = parentGraph.connectionNode;
-                            nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
+                        int i = nodeInputs.Count;
+                        nodeInputs.Add(new NodeInput());
+                        nodeInputs[i].inputNode = parentGraph.connectionNode;
+                        nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
 
-                            parentGraph.wantsConnection = false;
-                            parentGraph.connectionNode = null;
-                            Debug.Log("Connected");
-                        }
-                        else
-                        {
-                            if (parentGraph.wantsConnection)
-                            {
-                                nodeInputs.Add(new NodeInput());
-                                nodeInputs[i++].inputNode = parentGraph.connectionNode;
-                                nodeInputs[i++].isOccupied = nodeInputs[i++].inputNode != null;
+                        Debug.Log("Added NodeInput and Connected " + parentGraph.connectionNode.ToString() + " at Pos: " + (i));
 
-                                parentGraph.wantsConnection = false;
-                                parentGraph.connectionNode = null;
-                                Debug.Log("Added NodeInput and Connected");
-                            }
-                        }
+                        parentGraph.wantsConnection = false;
+                        parentGraph.connectionNode = null;
+                    }
+                    else
+                    {
+                        nodeInputs = new System.Collections.Generic.List<NodeInput>();
+                        numberOfInputs = nodeInputs.Count;
                     }
                 }
             }
@@ -116,7 +113,7 @@ public class AdditionNode : NodeBase
             //Single Input Circles
             for (int i = 0; i < nodeInputs.Count; i++)
             {
-                if (GUI.Button(new Rect(nodeRect.x - 10f, nodeRect.y + (nodeRect.height * (1f/(nodeInputs.Count + 1))) * (i + 1) - 10f, 20f, 20f), "", guiSkin.GetStyle("node_input")))
+                if (GUI.Button(new Rect(nodeRect.x - 10f, nodeRect.y + (nodeRect.height * (1f / (nodeInputs.Count + 1))) * (i + 1) - 10f, 20f, 20f), "", guiSkin.GetStyle("node_input")))
                 {
                     if (parentGraph != null)
                     {
@@ -217,10 +214,7 @@ public class AdditionNode : NodeBase
 
         GUILayout.BeginVertical();
 
-        if (nodeInputs[0].isOccupied)
-        {
-            EditorGUILayout.LabelField("Value :", nodeSum.ToString("F"));
-        }
+        EditorGUILayout.LabelField("Value :", nodeSum.ToString("F"));
 
         GUILayout.Space(10);
 
@@ -236,7 +230,7 @@ public class AdditionNode : NodeBase
             //TODO Resize the InputHandlesList
         }
 
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
     }
 
 #endif

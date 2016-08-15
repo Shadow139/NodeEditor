@@ -47,4 +47,5 @@ public static class DrawUtilities
 
         Handles.DrawBezier(startPos, endPos, startTan, endTan, Color.black, null, 2);
     }
+    
 }

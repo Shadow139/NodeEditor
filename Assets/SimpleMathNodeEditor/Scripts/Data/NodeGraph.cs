@@ -58,10 +58,20 @@ public class NodeGraph : ScriptableObject
                     {
                         if (e.shift)
                         {
-                            selectedNodes.Add(node);
-                            selectedNode = node;
-                            selectedNode.isSelected = true;
-                            break;
+                            if (!node.isSelected)
+                            {
+                                selectedNodes.Add(node);
+                                selectedNode = node;
+                                selectedNode.isSelected = true;
+                                break;
+                            }
+                            else
+                            {
+                                selectedNodes.Remove(node);
+                                selectedNode = null;
+                                node.isSelected = false;
+                                break;
+                            }
                         }
                         else
                         {

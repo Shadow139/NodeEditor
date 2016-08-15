@@ -54,9 +54,15 @@ public class FloatNode : NodeBase
 
     public override void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
     {
-        base.DrawNodeProperties(viewRect, guiSkin);
+        GUILayout.BeginVertical();
+
+        GUILayout.Space(20);
 
         nodeValue = EditorGUILayout.FloatField("Float value", nodeValue, guiSkin.GetStyle("property_view"));
+
+        base.DrawNodeProperties(viewRect, guiSkin);
+
+        GUILayout.EndVertical();
     }
 #endif
 

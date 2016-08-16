@@ -14,6 +14,7 @@ public class NodeBase : ScriptableObject
 
     protected bool multiInput = false;
     protected int numberOfInputs;
+    public static float snapSize;
 
     public List<NodeInput> nodeInputs = new List<NodeInput>();
     public List<NodeOutput> nodeOutputs = new List<NodeOutput>();
@@ -68,29 +69,40 @@ public class NodeBase : ScriptableObject
                     rect.x += e.delta.x;
                     rect.y += e.delta.y;
 
+                    rect.position = snap(rect.position, snapSize);
+
                     //Debug.Log("Node Position: ( " + rect.x + " , " + rect.y + " ) - " + e.delta.x);
 
                     nodeRect = rect;
                 }
             }
 
-            if(e.keyCode == KeyCode.LeftArrow)
+            if(e.keyCode == KeyCode.LeftArrow && e.type == EventType.KeyUp)
             {
-                nodeRect.x -= 5;
+                nodeRect.x -= snapSize;
             }
-            if (e.keyCode == KeyCode.RightArrow)
+            if (e.keyCode == KeyCode.RightArrow && e.type == EventType.KeyUp)
             {
-                nodeRect.x += 5;
+                nodeRect.x += snapSize;
             }
-            if (e.keyCode == KeyCode.UpArrow)
+            if (e.keyCode == KeyCode.UpArrow && e.type == EventType.KeyUp)
             {
-                nodeRect.y -= 5;
+                nodeRect.y -= snapSize;
             }
-            if (e.keyCode == KeyCode.DownArrow)
+            if (e.keyCode == KeyCode.DownArrow && e.type == EventType.KeyUp)
             {
-                nodeRect.y += 5;
+                nodeRect.y += snapSize;
             }
         }
+    }
+
+    private Vector2 snap(Vector2 v, float snapValue)
+    {
+        return new Vector2
+        (
+            snapValue * Mathf.Round(v.x / snapValue),
+            snapValue * Mathf.Round(v.y / snapValue)
+        );
     }
 
     public virtual void UpdateNodeGUI(Event e, Rect viewRect, GUISkin guiSkin)
@@ -120,9 +132,9 @@ public class NodeBase : ScriptableObject
 
     public virtual void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
     {
-        GUILayout.Space(20);
-
         GUILayout.BeginVertical();
+
+        GUILayout.Space(20);
 
         multiInput = EditorGUILayout.Toggle("Multi Input", multiInput);
 
@@ -131,10 +143,13 @@ public class NodeBase : ScriptableObject
         if (!multiInput)
         {
             numberOfInputs = EditorGUILayout.IntField("Number of InputHandles", nodeInputs.Count, guiSkin.GetStyle("property_view"));
+            GUILayout.Space(10);
 
             resizeInputHandles(numberOfInputs);
             //TODO Resize the InputHandlesList
         }
+
+        snapSize = EditorGUILayout.IntSlider((int)snapSize, 1, 100);
 
         GUILayout.EndVertical();
     }

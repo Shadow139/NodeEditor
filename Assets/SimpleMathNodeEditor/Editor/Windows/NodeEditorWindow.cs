@@ -10,6 +10,7 @@ public class NodeEditorWindow : EditorWindow
 
     public NodePropertyView currentPropertyView;
     public NodeWorkView currentWorkView;
+    public NodeTimelineView currentTimelineView;
     public NodeGraph currentNodeGraph;
 
     public float viewPercentage = 0.75f;
@@ -50,12 +51,17 @@ public class NodeEditorWindow : EditorWindow
         Event e = Event.current;
         ProcessEvents(e);
 
+        //Workview
         currentWorkView.UpdateView(position, new Rect(0f,0f, viewPercentage, 1f), e, currentNodeGraph);
         currentWorkView.ProcessEvents(e);
-
+        //Properties
         currentPropertyView.UpdateView(new Rect(position.width,position.y,position.width,position.height), 
                                         new Rect(viewPercentage, 0f,1f - viewPercentage, 1f), e, currentNodeGraph);
         currentPropertyView.ProcessEvents(e);
+        //Timeline
+        currentTimelineView.UpdateView(new Rect(position.width, position.y, position.width, position.height),
+                                        new Rect(0f, -0.97f, viewPercentage, 0.03f), e, currentNodeGraph);
+        currentTimelineView.ProcessEvents(e);
 
         Repaint();
     }
@@ -68,6 +74,8 @@ public class NodeEditorWindow : EditorWindow
         {
             currentEditorWindow.currentPropertyView = new NodePropertyView();
             currentEditorWindow.currentWorkView = new NodeWorkView();
+            currentEditorWindow.currentTimelineView = new NodeTimelineView();
+
         }
         else
         {

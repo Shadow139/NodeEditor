@@ -22,31 +22,31 @@ public class NodePropertyView : ViewBaseClass
         GUILayout.Space(30f);
         GUILayout.BeginVertical();
 
-        if (currentNodeGraph == null || !currentNodeGraph.showProperties)
+        if (currentNodeGraph == null)
         {
-            //Draw Properties when nothing is selected
-            /*
-            EditorPreferences.gridColorOuter = EditorGUILayout.ColorField("Outer Color", EditorPreferences.gridColorOuter);
-            GUILayout.Space(6f);
-            EditorPreferences.gridColorInner = EditorGUILayout.ColorField("Inner Color", EditorPreferences.gridColorInner);
-            GUILayout.Space(6f);
-            EditorPreferences.gridSpacingDark = EditorGUILayout.FloatField("Grid Spacing Outer", EditorPreferences.gridSpacingDark);
-            GUILayout.Space(6f);
-            EditorPreferences.gridSpacingLight = EditorGUILayout.FloatField("Grid Spacing Inner", EditorPreferences.gridSpacingLight);
-            GUILayout.Space(6f);
-            */
+
+            
         }
         else
         {
-            if(currentNodeGraph.selectedNode != null)
+            if(currentNodeGraph.selectedNode != null && currentNodeGraph.showProperties)
             {
                 currentNodeGraph.selectedNode.DrawNodeProperties(viewRect, viewSkin);
+                curveX = EditorGUI.CurveField(new Rect(10, 250, viewRect.width - 20, 250), curveX);
             }
-            curveX = EditorGUI.CurveField(new Rect(10, 250, viewRect.width - 20, 250), curveX);
+            else if (!currentNodeGraph.showProperties)
+            {
+                //Draw Properties when nothing is selected            
+                EditorPreferences.gridColorOuter = EditorGUILayout.ColorField("Outer Color", EditorPreferences.gridColorOuter);
+                GUILayout.Space(6f);
+                EditorPreferences.gridColorInner = EditorGUILayout.ColorField("Inner Color", EditorPreferences.gridColorInner);
+                GUILayout.Space(6f);
+                EditorPreferences.gridSpacingDark = EditorGUILayout.FloatField("Grid Spacing Outer", EditorPreferences.gridSpacingDark);
+                GUILayout.Space(6f);
+                EditorPreferences.gridSpacingLight = EditorGUILayout.FloatField("Grid Spacing Inner", EditorPreferences.gridSpacingLight);
+                GUILayout.Space(6f);
+            }
         }
-
-        //DebugUtilities.drawWindowOutline(editorRect, Color.blue);
-        //Debug.Log(viewTitle + " Position: " + viewRect.ToString());
 
         GUILayout.EndVertical();
 

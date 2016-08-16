@@ -84,23 +84,41 @@ public class NodeGraph : ScriptableObject
                 }
             }
 
-            if(e.keyCode == KeyCode.LeftAlt)
+            if(e.keyCode == KeyCode.Tab && e.type == EventType.KeyUp)
             {
                 Debug.Log("align Nodes " + selectedNodes.Count);
-                alignNodes();
+                alignNodesHorizontally();
             }
 
+            if (e.keyCode == KeyCode.LeftAlt && e.type == EventType.KeyUp)
+            {
+                Debug.Log("align Nodes " + selectedNodes.Count);
+                alignNodesVertically();
+            }
         }
 
     }
 
-    private void alignNodes()
+    private void alignNodesHorizontally()
     {
         float x = selectedNodes[selectedNodes.Count - 1].nodeRect.center.x;
 
         for(int i = 0; i < selectedNodes.Count; i++)
         {
             selectedNodes[i].nodeRect.center = new Vector2(x, selectedNodes[i].nodeRect.center.y);
+        }
+    }
+
+    private void alignNodesVertically()
+    {
+        float y = selectedNodes[selectedNodes.Count - 1].nodeRect.y;
+
+        float height = 20f;
+
+        for (int i = 0; i < selectedNodes.Count - 1; i++)
+        {
+            height += selectedNodes[i].nodeRect.height;
+            selectedNodes[i].nodeRect.position = new Vector2(selectedNodes[i].nodeRect.position.x, y + (height + (20f * i)));
         }
     }
 

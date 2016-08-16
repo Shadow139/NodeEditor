@@ -54,6 +54,8 @@ public class FloatNode : NodeBase
 
     public override void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
     {
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(25);
         GUILayout.BeginVertical();
 
         GUILayout.Space(20);
@@ -63,6 +65,8 @@ public class FloatNode : NodeBase
         base.DrawNodeProperties(viewRect, guiSkin);
 
         GUILayout.EndVertical();
+        GUILayout.Space(5);
+        GUILayout.EndHorizontal();
     }
 #endif
 

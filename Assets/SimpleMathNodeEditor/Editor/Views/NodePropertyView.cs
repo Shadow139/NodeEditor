@@ -23,9 +23,7 @@ public class NodePropertyView : ViewBaseClass
         GUILayout.BeginVertical();
 
         if (currentNodeGraph == null)
-        {
-
-            
+        {            
         }
         else
         {
@@ -45,6 +43,8 @@ public class NodePropertyView : ViewBaseClass
                 GUILayout.Space(6f);
                 EditorPreferences.gridSpacingLight = EditorGUILayout.FloatField("Grid Spacing Inner", EditorPreferences.gridSpacingLight);
                 GUILayout.Space(6f);
+                WorkPreferences.showTimeInfo = EditorGUILayout.Toggle("showTimeInfo", WorkPreferences.showTimeInfo);
+
             }
         }
 

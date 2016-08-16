@@ -8,6 +8,7 @@ public class NodeBase : ScriptableObject
 {
     public string nodeName;
     public Rect nodeRect;
+    public Rect workViewRect;
     public NodeGraph parentGraph;
     public NodeType nodeType;
     public bool isSelected { get; set; }
@@ -109,25 +110,26 @@ public class NodeBase : ScriptableObject
     {
         ProcessEvents(e, viewRect);
 
+        workViewRect = viewRect;
         string currentStyle = isSelected ? "node_selected" : "node_default";
         GUI.Box(nodeRect, nodeName, guiSkin.GetStyle(currentStyle));
 
-        if (isSelected)
+        if (isSelected || WorkPreferences.showTimeInfo)
         {
-            drawTimelineConnetion(viewRect);
-            GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y - 16f , nodeRect.width * 0.5f, 20f),nodeRect.center.x + "");
+            drawTimelineConnetion();
+            GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y - 16f, nodeRect.width * 0.5f, 20f), nodeRect.center.x + "");
         }
- 
+
         EditorUtility.SetDirty(this);
     }
 
-    private void drawTimelineConnetion(Rect viewRect)
+    public void drawTimelineConnetion()
     {
         Handles.color = Color.black;
-
+        
         Handles.DrawLine(new Vector3(nodeRect.x + nodeRect.width * 0.5f,
             nodeRect.y + nodeRect.height , 0f),
-            new Vector3(nodeRect.x + nodeRect.width * 0.5f, viewRect.height , 0f));
+            new Vector3(nodeRect.x + nodeRect.width * 0.5f, workViewRect.height, 0f));
     }
 
     public virtual void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
@@ -188,7 +190,7 @@ public class NodeBase : ScriptableObject
 
     protected void resizeInputHandles(int size)
     {
-        if (nodeInputs.Count > size)
+        if (nodeInputs.Count >= size)
         {
             for (int i = 0; i < nodeInputs.Count; i++)
             {
@@ -198,7 +200,7 @@ public class NodeBase : ScriptableObject
                 }
             }
         }
-        else if (nodeInputs.Count < size)
+        else if (nodeInputs.Count <= size)
         {
             int numberOfInputsToAdd = size - nodeInputs.Count;
             for (int i = 0; i < numberOfInputsToAdd; i++)
@@ -233,7 +235,7 @@ public class NodeBase : ScriptableObject
                     else
                     {
                         Debug.Log("Removing MultiInput");
-                        nodeInputs = new System.Collections.Generic.List<NodeInput>();
+                        nodeInputs = new List<NodeInput>();
                         numberOfInputs = nodeInputs.Count;
                     }
                 }

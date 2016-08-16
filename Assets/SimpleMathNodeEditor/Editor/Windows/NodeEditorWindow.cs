@@ -50,9 +50,9 @@ public class NodeEditorWindow : EditorWindow
 
         Event e = Event.current;
         ProcessEvents(e);
-
+        
         //Workview
-        currentWorkView.UpdateView(position, new Rect(0f,0f, viewPercentage, 1f), e, currentNodeGraph);
+        currentWorkView.UpdateView(position, new Rect(0f,0f, viewPercentage, 0.975f), e, currentNodeGraph);
         currentWorkView.ProcessEvents(e);
         //Properties
         currentPropertyView.UpdateView(new Rect(position.width,position.y,position.width,position.height), 
@@ -75,7 +75,6 @@ public class NodeEditorWindow : EditorWindow
             currentEditorWindow.currentPropertyView = new NodePropertyView();
             currentEditorWindow.currentWorkView = new NodeWorkView();
             currentEditorWindow.currentTimelineView = new NodeTimelineView();
-
         }
         else
         {

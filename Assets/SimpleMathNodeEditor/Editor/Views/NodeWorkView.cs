@@ -44,9 +44,6 @@ public class NodeWorkView : ViewBaseClass
         GUI.BeginGroup(new Rect(panX, panY, 10000, 10000));
         GUI.Box(viewRect, viewTitle, viewSkin.GetStyle("bg_view"));
 
-        //DebugUtilities.drawWindowOutline(viewRect, Color.green);
-        //Debug.Log(viewTitle + " Position: " + viewRect.ToString());
-
         //Draw a Grid
         NodeUtilities.DrawGrid(viewRect, EditorPreferences.gridSpacingDark, EditorPreferences.gridColorOuter);
         NodeUtilities.DrawGrid(viewRect, EditorPreferences.gridSpacingLight, EditorPreferences.gridColorInner);

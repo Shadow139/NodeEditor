@@ -135,9 +135,6 @@ public class NodeGraph : ScriptableObject
 #if UNITY_EDITOR
     public void UpdateGraphGUI(Event e, Rect viewRect, GUISkin guiSkin)
     {
-        //DebugUtilities.drawWindowOutline(viewRect, Color.green);
-        //Debug.Log("GraphView Position: " + viewRect.ToString());
-
         if (nodes.Count > 0)
         {
             ProcessEvents(e, viewRect);

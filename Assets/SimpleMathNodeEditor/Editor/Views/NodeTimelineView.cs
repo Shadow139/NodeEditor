@@ -18,8 +18,8 @@ public class NodeTimelineView : ViewBaseClass
 
         GUILayout.BeginVertical();
 
-        DrawTicks(viewRect, 12, 0.6f, Color.grey);
-        DrawTicks(viewRect, 60, 0.4f, Color.black);
+        DrawTicks(viewRect, 12, 0.6f, Color.grey, false);
+        DrawTicks(viewRect, 60, 0.4f, Color.black, true);
 
 
         if (currentNodeGraph.nodes.Count > 0)
@@ -53,7 +53,7 @@ public class NodeTimelineView : ViewBaseClass
             new Vector3(pos.x, viewRect.height, 0f));
     }
 
-    public void DrawTicks(Rect viewRect, float gridSpacing, float heightOfTicks, Color gridColor)
+    public void DrawTicks(Rect viewRect, float gridSpacing, float heightOfTicks, Color gridColor,bool drawLabel)
     {
         int widthDivs = Mathf.CeilToInt(viewRect.width / gridSpacing);
 
@@ -64,6 +64,8 @@ public class NodeTimelineView : ViewBaseClass
         for (int x = 0; x < widthDivs; x++)
         {
             Handles.DrawLine(new Vector3(gridSpacing * x, viewRect.height * heightOfTicks, 0f), new Vector3(gridSpacing * x, viewRect.height, 0f));
+            if(drawLabel)
+                Handles.Label(new Vector3((gridSpacing * x) - (gridSpacing * 0.2f), 0f, 0f), (gridSpacing * x) + "");
         }
         
         Handles.EndGUI();

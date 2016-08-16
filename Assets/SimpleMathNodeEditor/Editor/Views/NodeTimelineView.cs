@@ -28,7 +28,6 @@ public class NodeTimelineView : ViewBaseClass
             {
                 if (node.isSelected || WorkPreferences.showTimeInfo)
                 {
-                    Debug.Log(viewRect.y);
                     drawTimelineConnetion(node.nodeRect.center);
                 }
             }

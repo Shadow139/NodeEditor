@@ -123,7 +123,7 @@ public class NodeBase : ScriptableObject
         EditorUtility.SetDirty(this);
     }
 
-    public void drawTimelineConnetion()
+    private void drawTimelineConnetion()
     {
         Handles.color = Color.black;
         

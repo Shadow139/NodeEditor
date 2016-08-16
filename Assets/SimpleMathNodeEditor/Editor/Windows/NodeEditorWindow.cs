@@ -50,7 +50,11 @@ public class NodeEditorWindow : EditorWindow
 
         Event e = Event.current;
         ProcessEvents(e);
-        
+
+        Debug.Log("Position: " + position);
+        Debug.Log("winSize: " + maxSize);
+        Debug.Log("Position: " + position);
+
         //Workview
         currentWorkView.UpdateView(position, new Rect(0f,0f, viewPercentage, 0.975f), e, currentNodeGraph);
         currentWorkView.ProcessEvents(e);
@@ -59,8 +63,8 @@ public class NodeEditorWindow : EditorWindow
                                         new Rect(viewPercentage, 0f,1f - viewPercentage, 1f), e, currentNodeGraph);
         currentPropertyView.ProcessEvents(e);
         //Timeline
-        currentTimelineView.UpdateView(new Rect(position.width, position.y, position.width, position.height),
-                                        new Rect(0f, -0.97f, viewPercentage, 0.03f), e, currentNodeGraph);
+        currentTimelineView.UpdateView(new Rect(position.width, position.height, position.width, position.height),
+                                        new Rect(0f, 0.975f, viewPercentage, 0.03f), e, currentNodeGraph);
         currentTimelineView.ProcessEvents(e);
 
         Repaint();

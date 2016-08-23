@@ -169,14 +169,18 @@ public class NodeWorkView : ViewBaseClass
 
     public void DrawStepOutOfNode(Rect viewRect)
     {
-        if (currentNodeGraph.graphNode != null)
+
+        if (currentNodeGraph != null)
         {
-            if (GUI.Button(new Rect(viewRect.x + (viewRect.width * 0.5f), viewRect.y, 250f, 50f), "Step Out"))
+            if (currentNodeGraph.graphNode != null)
             {
-                Debug.Log(((GraphNode)currentNodeGraph.graphNode).nodeGraph != null);
-                if (((GraphNode)currentNodeGraph.graphNode).nodeGraph != null)
-                    NodeUtilities.DisplayGraph(((GraphNode)currentNodeGraph.graphNode).parentGraph);
-            }
+                if (GUI.Button(new Rect(viewRect.x + (viewRect.width * 0.5f), viewRect.y, 250f, 50f), "Step Out"))
+                {
+                    Debug.Log(((GraphNode)currentNodeGraph.graphNode).nodeGraph != null);
+                    if (((GraphNode)currentNodeGraph.graphNode).nodeGraph != null)
+                        NodeUtilities.DisplayGraph(((GraphNode)currentNodeGraph.graphNode).parentGraph);
+                }
+            } 
         }
     }    
 

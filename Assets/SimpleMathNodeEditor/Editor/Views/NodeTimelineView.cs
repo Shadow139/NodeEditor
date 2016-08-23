@@ -76,7 +76,7 @@ public class NodeTimelineView : ViewBaseClass
                 string str = string.Format("{0:D2}:{1:D2}", 
                         t.Minutes,
                         t.Seconds);
-                Handles.Label(new Vector3((gridSpacing * x) - (gridSpacing * 0.2f), 0f, 0f), str);
+                Handles.Label(new Vector3((gridSpacing * x) - (gridSpacing * 0.35f), 0f, 0f), str);
             }
         }
         

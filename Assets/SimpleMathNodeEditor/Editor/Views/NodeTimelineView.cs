@@ -4,9 +4,12 @@ using UnityEditor;
 #endif
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class NodeTimelineView : ViewBaseClass
 {
+    public float xOffset;
+
     public NodeTimelineView() : base("") { }
     
     public override void UpdateView(Rect editorRect, Rect percentageRect, Event e, NodeGraph nodeGraph)
@@ -18,11 +21,10 @@ public class NodeTimelineView : ViewBaseClass
 
         GUILayout.BeginVertical();
 
-        DrawTicks(viewRect, 12, 0.6f, Color.grey, false);
-        DrawTicks(viewRect, 60, 0.4f, Color.black, true);
+        DrawTicks(viewRect, 10, 0.6f, Color.grey, false);
+        DrawTicks(viewRect, 50, 0.4f, Color.black, true);
 
-
-        if (currentNodeGraph.nodes.Count > 0)
+        if (currentNodeGraph != null)
         {
             foreach (NodeBase node in currentNodeGraph.nodes)
             {
@@ -44,9 +46,14 @@ public class NodeTimelineView : ViewBaseClass
 
     }
 
+    public void scrollViewRect(float x)
+    {
+        xOffset = -x;
+    }
+
     private void drawTimelineConnetion(Vector2 pos)
     {
-        Handles.color = Color.black;
+        Handles.color = Color.red;
 
         Handles.DrawLine(new Vector3(pos.x, 0f , 0f),
             new Vector3(pos.x, viewRect.height, 0f));
@@ -63,8 +70,14 @@ public class NodeTimelineView : ViewBaseClass
         for (int x = 0; x < widthDivs; x++)
         {
             Handles.DrawLine(new Vector3(gridSpacing * x, viewRect.height * heightOfTicks, 0f), new Vector3(gridSpacing * x, viewRect.height, 0f));
-            if(drawLabel)
-                Handles.Label(new Vector3((gridSpacing * x) - (gridSpacing * 0.2f), 0f, 0f), (gridSpacing * x) + "");
+            if (drawLabel)
+            {
+                TimeSpan t = TimeSpan.FromMilliseconds(gridSpacing * x * 100);
+                string str = string.Format("{0:D2}:{1:D2}", 
+                        t.Minutes,
+                        t.Seconds);
+                Handles.Label(new Vector3((gridSpacing * x) - (gridSpacing * 0.2f), 0f, 0f), str);
+            }
         }
         
         Handles.EndGUI();

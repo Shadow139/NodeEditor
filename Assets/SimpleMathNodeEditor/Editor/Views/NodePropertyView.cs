@@ -18,18 +18,18 @@ public class NodePropertyView : ViewBaseClass
         GUI.Box(viewRect, viewTitle, viewSkin.GetStyle("bg_view"));
 
         GUILayout.BeginArea(viewRect);
-        
-        GUILayout.Space(30f);
-        GUILayout.BeginVertical();
 
-        if (currentNodeGraph == null)
-        {            
-        }
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(15f);
+        GUILayout.BeginVertical();
+        GUILayout.Space(40f);
+        
+        if (currentNodeGraph == null) { }
         else
         {
-            if(currentNodeGraph.selectedNode != null && currentNodeGraph.showProperties)
+            if(currentNodeGraph.selectedNodes.Count > 0 && currentNodeGraph.showProperties)
             {
-                currentNodeGraph.selectedNode.DrawNodeProperties(viewRect, viewSkin);
+                currentNodeGraph.selectedNodes[currentNodeGraph.selectedNodes.Count - 1].DrawNodeProperties(viewRect, viewSkin);
                 curveX = EditorGUI.CurveField(new Rect(10, 250, viewRect.width - 20, 250), curveX);
             }
             else if (!currentNodeGraph.showProperties)
@@ -44,18 +44,23 @@ public class NodePropertyView : ViewBaseClass
                 EditorPreferences.gridSpacingLight = EditorGUILayout.FloatField("Grid Spacing Inner", EditorPreferences.gridSpacingLight);
                 GUILayout.Space(6f);
                 WorkPreferences.showTimeInfo = EditorGUILayout.Toggle("showTimeInfo", WorkPreferences.showTimeInfo);
+                GUILayout.Space(6f);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Snap Interval: ");
+                NodeBase.snapSize = EditorGUILayout.IntSlider((int)NodeBase.snapSize, 1, 50);
+                GUILayout.EndHorizontal();
 
             }
         }
 
         GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
 
         GUILayout.EndArea();
     }
 
     public override void ProcessEvents(Event e)
     {
-        base.ProcessEvents(e);
-        
+        base.ProcessEvents(e);        
     }
 }

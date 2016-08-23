@@ -15,7 +15,7 @@ public class NodeBase : ScriptableObject
 
     protected bool multiInput = false;
     protected int numberOfInputs;
-    public static float snapSize;
+    public static float snapSize = 10;
 
     public List<NodeInput> nodeInputs = new List<NodeInput>();
     public List<NodeOutput> nodeOutputs = new List<NodeOutput>();
@@ -48,31 +48,20 @@ public class NodeBase : ScriptableObject
 
     }
 
-    private void ProcessEvents(Event e, Rect viewRect)
+    private void ProcessEvents(Event e, Rect viewRect, Rect workViewRect)
     {
         if (isSelected)
         {
-            if (viewRect.Contains(e.mousePosition))
+            if (workViewRect.Contains(e.mousePosition))
             {
-                if (e.type == EventType.MouseDrag)
+            if (e.button == 0 && e.type == EventType.MouseDrag)
                 {
                     var rect = nodeRect;
-
-                    if (e.delta.x > 0)
-                    {
-
-                    }
-                    else
-                    {
-
-                    }
 
                     rect.x += e.delta.x;
                     rect.y += e.delta.y;
 
                     rect.position = snap(rect.position, snapSize);
-
-                    //Debug.Log("Node Position: ( " + rect.x + " , " + rect.y + " ) - " + e.delta.x);
 
                     nodeRect = rect;
                 }
@@ -106,9 +95,9 @@ public class NodeBase : ScriptableObject
         );
     }
 
-    public virtual void UpdateNodeGUI(Event e, Rect viewRect, GUISkin guiSkin)
+    public virtual void UpdateNodeGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
     {
-        ProcessEvents(e, viewRect);
+        ProcessEvents(e, viewRect, workViewRect);
 
         workViewRect = viewRect;
         string currentStyle = isSelected ? "node_selected" : "node_default";
@@ -116,44 +105,50 @@ public class NodeBase : ScriptableObject
 
         if (isSelected || WorkPreferences.showTimeInfo)
         {
-            drawTimelineConnetion();
-            GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y - 16f, nodeRect.width * 0.5f, 20f), nodeRect.center.x + "");
+            DrawTimelineConnetion();
+            DrawCurrentTimePosition();
+
+            //GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y - 16f, nodeRect.width * 0.5f, 20f), nodeRect.center.x + "");
+        }
+
+        if (!multiInput)
+        {
+            nodeRect.height = 40f + (30f * nodeInputs.Count);
+            if (nodeInputs.Count == 0)
+                nodeRect.height = 75f;
+        }
+        else
+        {
+            nodeRect.height = 100f;
         }
 
         EditorUtility.SetDirty(this);
     }
 
-    private void drawTimelineConnetion()
+    private void DrawTimelineConnetion()
     {
         Handles.color = Color.black;
         
-        Handles.DrawLine(new Vector3(nodeRect.x + nodeRect.width * 0.5f,
-            nodeRect.y + nodeRect.height , 0f),
-            new Vector3(nodeRect.x + nodeRect.width * 0.5f, workViewRect.height, 0f));
+        Handles.DrawLine(new Vector3(nodeRect.x + nodeRect.width * 0.5f, nodeRect.y + nodeRect.height , 0f),
+            new Vector3(nodeRect.x + nodeRect.width * 0.5f, 10000, 0f));
     }
 
     public virtual void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
     {
-        GUILayout.BeginVertical();
-
-        GUILayout.Space(20);
-
+        GUILayout.Space(6);
+        GUILayout.BeginHorizontal();
         multiInput = EditorGUILayout.Toggle("Multi Input", multiInput);
-
-        GUILayout.Space(10);
+        GUILayout.Space(6);
 
         if (!multiInput)
         {
-            numberOfInputs = EditorGUILayout.IntField("Number of InputHandles", nodeInputs.Count, guiSkin.GetStyle("property_view"));
-            GUILayout.Space(10);
+            numberOfInputs = EditorGUILayout.IntField("", nodeInputs.Count, guiSkin.GetStyle("property_view"));
 
             resizeInputHandles(numberOfInputs);
             //TODO Resize the InputHandlesList
         }
 
-        snapSize = EditorGUILayout.IntSlider((int)snapSize, 1, 100);
-
-        GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
     }
 
     protected void DrawInputLines()
@@ -174,6 +169,17 @@ public class NodeBase : ScriptableObject
             }
         }
         Handles.EndGUI();
+    }
+
+    protected void DrawCurrentTimePosition()
+    {
+        TimeSpan t = TimeSpan.FromMilliseconds(nodeRect.center.x * 100);
+        string str = string.Format("{0:D2}m:{1:D2}s:{2:D2}ms",
+                t.Minutes,
+                t.Seconds,
+                t.Milliseconds/10);
+
+        GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 50f, nodeRect.y - 16f, nodeRect.width, 25f), str);
     }
 
     protected void DrawNodeConnection(NodeInput currentInput, float inputId)
@@ -217,22 +223,32 @@ public class NodeBase : ScriptableObject
             //Multi Input Box
             if (GUI.Button(new Rect(nodeRect.x - 16f, nodeRect.y + (nodeRect.height * 0.5f) - 30f, 16f, 60f), "", guiSkin.GetStyle("node_multiInput")))
             {
-
                 if (parentGraph != null)
                 {
                     if (parentGraph.wantsConnection)
                     {
+                        for (int k = 0; k < nodeInputs.Count; k++)
+                        {
+                            if(nodeInputs[k].inputNode == null && nodeInputs[k].isOccupied == false)
+                            {
+                                nodeInputs[k].inputNode = parentGraph.connectionNode;
+                                nodeInputs[k].isOccupied = nodeInputs[k].inputNode != null;
+
+                                parentGraph.wantsConnection = false;
+                                parentGraph.connectionNode = null;
+                                return;
+                            }
+                        }
+
                         int i = nodeInputs.Count;
                         nodeInputs.Add(new NodeInput());
                         nodeInputs[i].inputNode = parentGraph.connectionNode;
                         nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
 
-                        Debug.Log("Added NodeInput and Connected " + parentGraph.connectionNode.ToString() + " at Pos: " + (i));
-
                         parentGraph.wantsConnection = false;
                         parentGraph.connectionNode = null;
                     }
-                    else
+                    else // remove all Inputs
                     {
                         Debug.Log("Removing MultiInput");
                         nodeInputs = new List<NodeInput>();
@@ -240,6 +256,9 @@ public class NodeBase : ScriptableObject
                     }
                 }
             }
+
+            GUI.Label(new Rect(nodeRect.x - 12f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeInputs.Count + "", guiSkin.GetStyle("std_whiteText"));
+
         }
         else
         {
@@ -270,4 +289,34 @@ public class NodeBase : ScriptableObject
         }
     }
 
+    public void drawOutputHandles(GUISkin guiSkin)
+    {
+        if (multiInput)
+        {
+            if (GUI.Button(new Rect(nodeRect.x + nodeRect.width, nodeRect.y + nodeRect.height * 0.5f - 30f, 16f, 60f), "", guiSkin.GetStyle("node_multiOutput")))
+            {
+                if (parentGraph != null)
+                {
+                    parentGraph.wantsConnection = true;
+                    parentGraph.connectionNode = this;
+                }
+            }
+
+            GUI.Label(new Rect(nodeRect.x + nodeRect.width , nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeOutputs.Count + "", guiSkin.GetStyle("std_whiteText"));
+        }
+        else
+        {
+            for (int i = 0; i < nodeOutputs.Count; i++)
+            {
+                if (GUI.Button(new Rect(nodeRect.x + nodeRect.width - 10f, nodeRect.y + (nodeRect.height * (1f / (nodeOutputs.Count + 1))) * (i + 1) - 10f, 20f, 20f), "", guiSkin.GetStyle("node_output")))
+                {
+                    if (parentGraph != null)
+                    {
+                        parentGraph.wantsConnection = true;
+                        parentGraph.connectionNode = this;
+                    }
+                }
+            }
+        }
+    }
 }

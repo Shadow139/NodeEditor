@@ -10,10 +10,9 @@ public class NodeEditorWindow : EditorWindow
 
     public NodePropertyView currentPropertyView;
     public NodeWorkView currentWorkView;
-    public NodeTimelineView currentTimelineView;
     public NodeGraph currentNodeGraph;
 
-    public float viewPercentage = 0.75f;
+    public float viewPercentage = 0.84f;
     #endregion
 
     #region Methods
@@ -25,7 +24,6 @@ public class NodeEditorWindow : EditorWindow
         CreateViews();
     }
 
-
     void OnEnable()
     {
         Debug.Log("Node Editor Windows was Enabled.");
@@ -36,9 +34,7 @@ public class NodeEditorWindow : EditorWindow
         Debug.Log("Node Editor Window was Destroyed.");
     }
 
-    void Update()
-    {
-    }
+    void Update() { }
 
     void OnGUI()
     {
@@ -51,21 +47,15 @@ public class NodeEditorWindow : EditorWindow
         Event e = Event.current;
         ProcessEvents(e);
 
-        Debug.Log("Position: " + position);
-        Debug.Log("winSize: " + maxSize);
-        Debug.Log("Position: " + position);
+        currentWorkView.isInsidePropertyView = currentPropertyView.viewRect.Contains(e.mousePosition);
 
         //Workview
-        currentWorkView.UpdateView(position, new Rect(0f,0f, viewPercentage, 0.975f), e, currentNodeGraph);
+        currentWorkView.UpdateView(position, new Rect(0f,0f, viewPercentage, 1f), e, currentNodeGraph);
         currentWorkView.ProcessEvents(e);
         //Properties
         currentPropertyView.UpdateView(new Rect(position.width,position.y,position.width,position.height), 
                                         new Rect(viewPercentage, 0f,1f - viewPercentage, 1f), e, currentNodeGraph);
         currentPropertyView.ProcessEvents(e);
-        //Timeline
-        currentTimelineView.UpdateView(new Rect(position.width, position.height, position.width, position.height),
-                                        new Rect(0f, 0.975f, viewPercentage, 0.03f), e, currentNodeGraph);
-        currentTimelineView.ProcessEvents(e);
 
         Repaint();
     }
@@ -78,7 +68,6 @@ public class NodeEditorWindow : EditorWindow
         {
             currentEditorWindow.currentPropertyView = new NodePropertyView();
             currentEditorWindow.currentWorkView = new NodeWorkView();
-            currentEditorWindow.currentTimelineView = new NodeTimelineView();
         }
         else
         {

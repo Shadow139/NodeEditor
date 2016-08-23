@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,9 +8,7 @@ public class GraphNode : NodeBase
 {
     public NodeGraph nodeGraph;
 
-    public GraphNode()
-    {
-    }
+    public GraphNode() { }
 
     public override void InitNode()
     {
@@ -32,17 +28,16 @@ public class GraphNode : NodeBase
 
     }     
 
-#if UNITY_EDITOR
-    public override void UpdateNodeGUI(Event e, Rect viewRect, GUISkin guiSkin)
+    public override void UpdateNodeGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
     {                
-        base.UpdateNodeGUI(e, viewRect, guiSkin);
+        base.UpdateNodeGUI(e, viewRect, workViewRect, guiSkin);
         drawInputHandles(guiSkin);
+        drawOutputHandles(guiSkin);
 
         DrawInputLines();
 
         if (multiInput)
-            GUI.Label(new Rect(nodeRect.x - 12f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeInputs.Count + "", guiSkin.GetStyle("std_whiteText"));
-        
+            GUI.Label(new Rect(nodeRect.x - 12f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeInputs.Count + "", guiSkin.GetStyle("std_whiteText"));        
     }
 
     public override void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
@@ -50,7 +45,5 @@ public class GraphNode : NodeBase
         base.DrawNodeProperties(viewRect, guiSkin);
         
     }
-#endif
-
 }
 

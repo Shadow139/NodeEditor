@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -13,10 +12,13 @@ public class NodeGraph : ScriptableObject
     public string graphName = "New Graph";
     public List<NodeBase> nodes;
     public List<NodeBase> selectedNodes;
-    public NodeBase selectedNode;
+    public NodeBase graphNode = null;
     public bool showProperties;
     public bool wantsConnection;
     public NodeBase connectionNode;
+    public Vector2 mousePos;
+    public bool isInsidePropertyView;
+
 
     void OnEnable()
     {
@@ -41,11 +43,11 @@ public class NodeGraph : ScriptableObject
         }
     }
 
-    private void ProcessEvents(Event e, Rect viewRect)
+    private void ProcessEvents(Event e, Rect viewRect, Rect workViewRect)
     {
-        if (viewRect.Contains(e.mousePosition))
+        if (workViewRect.Contains(e.mousePosition))
         {
-            if (e.button == 0 && e.type == EventType.MouseDown)
+            if (e.button == 0 && e.type == EventType.MouseDown && !isInsidePropertyView)
             {
                 if (!wantsConnection && !e.shift)
                 {
@@ -61,14 +63,12 @@ public class NodeGraph : ScriptableObject
                             if (!node.isSelected)
                             {
                                 selectedNodes.Add(node);
-                                selectedNode = node;
-                                selectedNode.isSelected = true;
+                                node.isSelected = true;
                                 break;
                             }
                             else
                             {
                                 selectedNodes.Remove(node);
-                                selectedNode = null;
                                 node.isSelected = false;
                                 break;
                             }
@@ -76,27 +76,35 @@ public class NodeGraph : ScriptableObject
                         else
                         {
                             selectedNodes.Add(node);
-                            selectedNode = node;
-                            selectedNode.isSelected = true;
+                            node.isSelected = true;
                             break;
                         }
                     }
                 }
             }
 
+            if(e.control && e.keyCode == KeyCode.A)
+            {
+                selectedNodes.Clear();
+                foreach (NodeBase node in nodes)
+                {
+                    selectedNodes.Add(node);
+                    node.isSelected = true;
+                }
+            }
+
             if(e.keyCode == KeyCode.Tab && e.type == EventType.KeyUp)
             {
-                Debug.Log("align Nodes " + selectedNodes.Count);
+                Debug.Log("align Nodes Horizontally " + selectedNodes.Count);
                 alignNodesHorizontally();
             }
 
             if (e.keyCode == KeyCode.LeftAlt && e.type == EventType.KeyUp)
             {
-                Debug.Log("align Nodes " + selectedNodes.Count);
+                Debug.Log("align Nodes Vertically " + selectedNodes.Count);
                 alignNodesVertically();
             }
         }
-
     }
 
     private void alignNodesHorizontally()
@@ -127,21 +135,24 @@ public class NodeGraph : ScriptableObject
         nodes.ForEach(node => node.isSelected = false);
         selectedNodes.Clear();
         showProperties = false;
-        selectedNode = null;
         wantsConnection = false;
         connectionNode = null;
     }
 
-#if UNITY_EDITOR
-    public void UpdateGraphGUI(Event e, Rect viewRect, GUISkin guiSkin)
+    public void UpdateGraphGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
     {
+        mousePos = e.mousePosition;
+
+        DrawNodeGraphInputs(viewRect, guiSkin);
+        DrawNodeGraphOutputs(viewRect, guiSkin);
+
         if (nodes.Count > 0)
         {
-            ProcessEvents(e, viewRect);
+            ProcessEvents(e, viewRect, workViewRect);
 
             foreach (NodeBase node in nodes)
             {
-                node.UpdateNodeGUI(e, viewRect, guiSkin);
+                node.UpdateNodeGUI(e, viewRect, workViewRect, guiSkin);
             }
         }
 
@@ -159,7 +170,7 @@ public class NodeGraph : ScriptableObject
             }
        }
 
-        if (e.type == EventType.Layout && selectedNode != null)
+        if (e.type == EventType.Layout && selectedNodes.Count > 0)
         {
             showProperties = true;
         }
@@ -171,5 +182,41 @@ public class NodeGraph : ScriptableObject
     {
         DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition);
     }
-#endif
+    
+    public void DrawNodeGraphInputs(Rect viewRect, GUISkin guiSkin)
+    {
+        if(graphNode != null)
+        {
+            for(int i = 0; i < graphNode.nodeInputs.Count; i++)
+            {
+                NodeBase.NodeInput input = graphNode.nodeInputs[i];
+                if (GUI.Button(new Rect(viewRect.x, viewRect.y + (viewRect.height * (1f / (graphNode.nodeInputs.Count + 1))) * (i + 1), 32f, 64f), "", guiSkin.GetStyle("node_multiOutput")))
+                {
+                    if (graphNode.parentGraph != null)
+                    {
+                        wantsConnection = true;
+                        connectionNode = input.inputNode;
+                    }
+                }
+            }
+        }
+    }
+
+    public void DrawNodeGraphOutputs(Rect viewRect, GUISkin guiSkin)
+    {
+        if (graphNode != null)
+        {
+            if (GUI.Button(new Rect(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f), 32f, 120f), "", guiSkin.GetStyle("node_multiInput")))
+            {
+                int i = graphNode.nodeOutputs.Count;
+                graphNode.nodeOutputs.Add(new NodeBase.NodeOutput());
+
+                graphNode.nodeOutputs[i].outputNode = connectionNode;
+                graphNode.nodeOutputs[i].isOccupied = graphNode.nodeOutputs[i].outputNode != null;
+
+                wantsConnection = false;
+                connectionNode = null;
+            }
+        }
+    }
 }

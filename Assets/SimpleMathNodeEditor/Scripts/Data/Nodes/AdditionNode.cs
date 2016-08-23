@@ -26,7 +26,7 @@ public class AdditionNode : NodeBase
     {
         base.InitNode();
         nodeType = NodeType.Addition;
-        nodeRect = new Rect(10f, 10f, 160f, 100f);
+        nodeRect = new Rect(10f, 10f, 150f, 100f);
     }
 
     public override void UpdateNode(Event e, Rect viewRect)
@@ -34,31 +34,18 @@ public class AdditionNode : NodeBase
         base.UpdateNode(e, viewRect);
     }
 
-    public override void UpdateNodeGUI(Event e, Rect viewRect, GUISkin guiSkin)
+    public override void UpdateNodeGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
     {        
-        base.UpdateNodeGUI(e, viewRect, guiSkin);
+        base.UpdateNodeGUI(e, viewRect, workViewRect, guiSkin);
 
         drawOutputHandles(guiSkin);
         drawInputHandles(guiSkin);
-
-        if (!multiInput)
-        {
-            nodeRect.height = 40f + (30f * nodeInputs.Count);
-            if (nodeInputs.Count == 0)
-                nodeRect.height = 60f;
-        }
-        else
-        {
-            nodeRect.height = 100f;
-        }
 
         evaluateNode();
         DrawInputLines();
 
         GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.5f - 10f, 20f), nodeSum.ToString(), labelGuiStyle);
-        if (multiInput)
-            GUI.Label(new Rect(nodeRect.x - 12f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeInputs.Count + "", guiSkin.GetStyle("std_whiteText"));
-
+   
         if (Handles.Button(new Vector3(nodeRect.x, nodeRect.y, 0f), Quaternion.identity, 1f, 2f, DrawFunc))
         {
             Debug.Log("hello");
@@ -72,19 +59,6 @@ public class AdditionNode : NodeBase
         Handles.DrawCube(controlId, position, rotation, size);
     } 
   
-    public void drawOutputHandles(GUISkin guiSkin)
-    {
-        // Output
-        if (GUI.Button(new Rect(nodeRect.x + nodeRect.width - 10f, nodeRect.y + nodeRect.height * 0.5f - 10f, 20f, 20f), "", guiSkin.GetStyle("node_output")))
-        {
-            if (parentGraph != null)
-            {
-                parentGraph.wantsConnection = true;
-                parentGraph.connectionNode = this;
-            }
-        }
-    }
-
     //deprecated 
     public void DrawLine(NodeInput currentInput, float inputId)
     {
@@ -109,23 +83,20 @@ public class AdditionNode : NodeBase
                 {
                     tempSum += ((AdditionNode)nodeInputs[i].inputNode).nodeSum;
                 }
-            }  
+                else if (nodeInputs[i].inputNode.GetType() == typeof(GraphNode))
+                {
+                    tempSum += ((AdditionNode)((GraphNode)nodeInputs[i].inputNode).nodeOutputs[0].outputNode).nodeSum;
+                }
+            }
         }
         nodeSum = tempSum;
     }
 
     public override void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
     {
-
-        GUILayout.BeginVertical();
-
-        GUILayout.Space(20);
-
         EditorGUILayout.LabelField("Value :", nodeSum.ToString("F"));
 
         base.DrawNodeProperties(viewRect, guiSkin);
-
-        GUILayout.EndVertical();
     }
 
 }

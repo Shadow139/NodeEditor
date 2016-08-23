@@ -11,17 +11,27 @@ public class NodeWorkView : ViewBaseClass
 {
     #region Variables
     private Vector2 mousePos;
+    private Rect workSpaceRect;
     protected NodeBase NodeToDelete;
+    public bool isInsidePropertyView;
 
-    //float panX = Screen.width / 2 - 5000; // to start in the Middle of your work area and not the left upper corner(0,0)
-    //float panY = Screen.height / 2 - 5000;
+    public NodeTimelineView currentTimelineView;
+
     float panX = 0;
     float panY = 0;
+
+    private const float kZoomMin = 0.7f; // max zoom out
+    private const float kZoomMax = 1.0f; // max zoom in
+    private float _zoom = 1.0f;
+    private readonly Rect _zoomArea = new Rect(0.0f, 0.0f, 10000f, 10000f);
+
     #endregion
 
 
     #region Constructors
-    public NodeWorkView() : base("Node View") { }
+    public NodeWorkView() : base("Node View") {
+        currentTimelineView = new NodeTimelineView();
+    }
     #endregion
 
     #region Methods
@@ -29,33 +39,46 @@ public class NodeWorkView : ViewBaseClass
     {
         base.UpdateView(editorRect, percentageRect, e, nodeGraph);
 
-        //Update view Title
+        if(currentTimelineView == null)
+            createTimeline();
+        
         if (currentNodeGraph != null)
         {
             viewTitle = currentNodeGraph.graphName;
+            currentNodeGraph.isInsidePropertyView = isInsidePropertyView;
         }
         else
         {
             viewTitle = "No Graph Loaded.";
         }
 
-        // Testing Group with some test values 
-        //TODO Update and improve Performance 
-        GUI.BeginGroup(new Rect(panX, panY, 10000, 10000));
-        GUI.Box(viewRect, viewTitle, viewSkin.GetStyle("bg_view"));
+        workSpaceRect = new Rect(panX, panY, 10000, 10000);
+
+        EditorZoomArea.Begin(_zoom, _zoomArea);
+
+        GUI.BeginGroup(workSpaceRect);
+        GUI.Box(new Rect(0, 0, 10000, 10000), viewTitle, viewSkin.GetStyle("bg_view"));
 
         //Draw a Grid
-        NodeUtilities.DrawGrid(viewRect, EditorPreferences.gridSpacingDark, EditorPreferences.gridColorOuter);
-        NodeUtilities.DrawGrid(viewRect, EditorPreferences.gridSpacingLight, EditorPreferences.gridColorInner);
+        NodeUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingDark, EditorPreferences.gridColorOuter);
+        NodeUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingLight, EditorPreferences.gridColorInner);
 
-        GUILayout.BeginArea(viewRect);
+        GUILayout.BeginArea(new Rect(0, 0, 10000, 10000));
 
         if (currentNodeGraph != null)
         {
-            currentNodeGraph.UpdateGraphGUI(e, viewRect, viewSkin);
+            currentNodeGraph.UpdateGraphGUI(e, viewRect, new Rect(0, 0, 10000, 10000), viewSkin);
         }
 
+        DrawStepOutOfNode(viewRect);
+
         GUILayout.EndArea();
+
+        currentTimelineView.UpdateView(new Rect(panX, -panY + (viewRect.height / _zoom) * 0.96f, 10000, viewRect.height / _zoom),
+                new Rect(0f, 1f, 1f, 0.05f), e, currentNodeGraph);
+        currentTimelineView.ProcessEvents(e);
+
+        EditorZoomArea.End();
 
         GUI.EndGroup();
     }
@@ -64,22 +87,25 @@ public class NodeWorkView : ViewBaseClass
     {
         base.ProcessEvents(e);
 
-        if (viewRect.Contains(e.mousePosition))
+        if (workSpaceRect.Contains(e.mousePosition))
         {
             if(e.button == 0) // Left Mouseclick
             {
-                if(e.type == EventType.MouseDown)
+                if(e.type == EventType.MouseDown && e.clickCount == 2)
                 {
-                    Debug.Log("Left Click in: " + viewTitle);
+                    if(currentNodeGraph != null)
+                    {
+                        NodeBase n = currentNodeGraph.nodes.FirstOrDefault(x => x.nodeRect.Contains(currentNodeGraph.mousePos));
+                        if(n != null)
+                        {
+                            if(n.nodeType == NodeType.Graph)
+                            {
+                                NodeUtilities.DisplayGraph(((GraphNode)n).nodeGraph);
+                            }
+                        }
+                    }
                 }
-                if (e.type == EventType.MouseDrag)
-                {
-                    Debug.Log("LeftMouseDrag in: " + viewTitle);
-                }
-                if (e.type == EventType.MouseUp)
-                {
-                    Debug.Log("LeftMouse Released in: ");
-                }
+
             }
 
             if (e.button == 1) // Right Mouseclick
@@ -90,7 +116,7 @@ public class NodeWorkView : ViewBaseClass
                     NodeToDelete = null;
                     if (currentNodeGraph != null)
                     {
-                        NodeToDelete = currentNodeGraph.nodes.FirstOrDefault(x => x.nodeRect.Contains(e.mousePosition));
+                        NodeToDelete = currentNodeGraph.nodes.FirstOrDefault(x => x.nodeRect.Contains(currentNodeGraph.mousePos));
                     }
 
                     if (NodeToDelete == null)
@@ -108,11 +134,30 @@ public class NodeWorkView : ViewBaseClass
             {
                 if (e.type == EventType.MouseDrag)
                 {                    
-                    Debug.Log("MiddleMouseDrag at: " + e.mousePosition);
                     panX += e.delta.x;
                     panY += e.delta.y;
+                    currentTimelineView.scrollViewRect(panX);
                 }
             }
+
+            if (Event.current.type == EventType.ScrollWheel)
+            {
+                Vector2 screenCoordsMousePos = Event.current.mousePosition;
+                Vector2 delta = Event.current.delta;
+                Vector2 zoomCoordsMousePos = ConvertScreenCoordsToZoomCoords(screenCoordsMousePos);
+                float zoomDelta = -delta.y / 150.0f;
+                float oldZoom = _zoom;
+                _zoom += zoomDelta;
+                _zoom = Mathf.Clamp(_zoom, kZoomMin, kZoomMax);
+                mousePos += (zoomCoordsMousePos - mousePos) - (oldZoom / _zoom) * (zoomCoordsMousePos - mousePos);
+
+                Event.current.Use();
+            }
+        }
+
+        if(e.keyCode == KeyCode.Delete)
+        {
+
         }
 
         if (panX > 0)
@@ -120,6 +165,24 @@ public class NodeWorkView : ViewBaseClass
 
         if (panY > 0)
             panY = 0;
+    }
+
+    public void DrawStepOutOfNode(Rect viewRect)
+    {
+        if (currentNodeGraph.graphNode != null)
+        {
+            if (GUI.Button(new Rect(viewRect.x + (viewRect.width * 0.5f), viewRect.y, 250f, 50f), "Step Out"))
+            {
+                Debug.Log(((GraphNode)currentNodeGraph.graphNode).nodeGraph != null);
+                if (((GraphNode)currentNodeGraph.graphNode).nodeGraph != null)
+                    NodeUtilities.DisplayGraph(((GraphNode)currentNodeGraph.graphNode).parentGraph);
+            }
+        }
+    }    
+
+    private Vector2 ConvertScreenCoordsToZoomCoords(Vector2 screenCoords)
+    {
+        return (screenCoords - _zoomArea.TopLeft()) / _zoom + mousePos;
     }
 
     #endregion
@@ -183,11 +246,11 @@ public class NodeWorkView : ViewBaseClass
                 Debug.Log("Unloading Graph");
                 break;
             case "3":
-                NodeUtilities.CreateNode(currentNodeGraph, NodeType.Float, mousePos);
+                NodeUtilities.CreateNode(currentNodeGraph, NodeType.Float, currentNodeGraph.mousePos);
                 Debug.Log("Float Node added");
                 break;
             case "4":
-                NodeUtilities.CreateNode(currentNodeGraph, NodeType.Addition, mousePos);
+                NodeUtilities.CreateNode(currentNodeGraph, NodeType.Addition, currentNodeGraph.mousePos);
                 Debug.Log("Addition Node added");
                 break;
             case "5":
@@ -195,7 +258,7 @@ public class NodeWorkView : ViewBaseClass
                 {
                     NodeBase currentNode = NodeUtilities.CreateNode(NodeType.Graph);
                     NodeGraphPopupWindow.InitNodePopup(currentNode, currentNodeGraph);
-                    NodeUtilities.initAndSaveNode(currentNode, currentNodeGraph, mousePos);
+                    NodeUtilities.initAndSaveNode(currentNode, currentNodeGraph, currentNodeGraph.mousePos);
                 }
                 Debug.Log("New Graph Node added");
                 break;
@@ -205,8 +268,9 @@ public class NodeWorkView : ViewBaseClass
                     NodeBase currentNode = NodeUtilities.CreateNode(NodeType.Graph);
                     NodeGraph graph = NodeUtilities.getSavedNodegraph();
                     ((GraphNode)currentNode).nodeGraph = graph;
+                    graph.graphNode = currentNode;
                     currentNode.nodeName = graph.graphName;
-                    NodeUtilities.initAndSaveNode(currentNode, currentNodeGraph, mousePos);
+                    NodeUtilities.initAndSaveNode(currentNode, currentNodeGraph, currentNodeGraph.mousePos);
                 }
                 Debug.Log("Existing Graph Node added");
                 break;
@@ -222,6 +286,11 @@ public class NodeWorkView : ViewBaseClass
             default:
                 break;
         }
+    }
+
+    private void createTimeline()
+    {
+        currentTimelineView = new NodeTimelineView();
     }
 
     #endregion

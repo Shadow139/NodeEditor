@@ -11,4 +11,13 @@ public class NodeMenu
         NodeEditorWindow.InitEditorWindow();
     }
 
+    [MenuItem("Node Editor/Preferences")]
+    public static void OpenNodePreferences()
+    {
+        Debug.Log("Node Preferences Started!");
+        PreferencesWindow.InitPreferenceWindow();
+    }
+
+
+
 }

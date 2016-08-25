@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -16,6 +13,8 @@ public class NodeWorkView : ViewBaseClass
     public bool isInsidePropertyView;
 
     public NodeTimelineView currentTimelineView;
+
+    private List<NodeDescriptor> typesOfNodes;
 
     float panX = 0;
     float panY = 0;

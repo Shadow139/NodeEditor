@@ -21,21 +21,7 @@ public class NodeBase : ScriptableObject
     public List<NodeOutput> nodeOutputs = new List<NodeOutput>();
 
     public GUISkin nodeSkin { get; set; }
-
-    [Serializable]
-    public class NodeInput
-    {
-        public bool isOccupied;
-        public NodeBase inputNode;
-    }
-
-    [Serializable]
-    public class NodeOutput
-    {
-        public bool isOccupied;
-        public NodeBase outputNode;
-    }
-
+    
     public virtual void InitNode() { }
 
     public virtual void UpdateNode(Event e, Rect viewRect)
@@ -102,6 +88,7 @@ public class NodeBase : ScriptableObject
         workViewRect = viewRect;
         string currentStyle = isSelected ? "node_selected" : "node_default";
         GUI.Box(nodeRect, nodeName, guiSkin.GetStyle(currentStyle));
+        GUI.Box(new Rect(nodeRect.x, nodeRect.y, nodeRect.width, 27f), nodeName, guiSkin.GetStyle(currentStyle));
 
         if (isSelected || WorkPreferences.showTimeInfo)
         {

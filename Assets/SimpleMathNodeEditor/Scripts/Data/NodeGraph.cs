@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
-
 
 [Serializable]
 public class NodeGraph : ScriptableObject
@@ -189,7 +186,7 @@ public class NodeGraph : ScriptableObject
         {
             for(int i = 0; i < graphNode.nodeInputs.Count; i++)
             {
-                NodeBase.NodeInput input = graphNode.nodeInputs[i];
+                NodeInput input = graphNode.nodeInputs[i];
                 if (GUI.Button(new Rect(viewRect.x, viewRect.y + (viewRect.height * (1f / (graphNode.nodeInputs.Count + 1))) * (i + 1), 32f, 64f), "", guiSkin.GetStyle("node_multiOutput")))
                 {
                     if (graphNode.parentGraph != null)
@@ -209,7 +206,7 @@ public class NodeGraph : ScriptableObject
             if (GUI.Button(new Rect(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f), 32f, 120f), "", guiSkin.GetStyle("node_multiInput")))
             {
                 int i = graphNode.nodeOutputs.Count;
-                graphNode.nodeOutputs.Add(new NodeBase.NodeOutput());
+                graphNode.nodeOutputs.Add(new NodeOutput());
 
                 graphNode.nodeOutputs[i].outputNode = connectionNode;
                 graphNode.nodeOutputs[i].isOccupied = graphNode.nodeOutputs[i].outputNode != null;

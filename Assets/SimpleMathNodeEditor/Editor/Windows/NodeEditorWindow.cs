@@ -13,6 +13,7 @@ public class NodeEditorWindow : EditorWindow
     public NodeGraph currentNodeGraph;
 
     public float viewPercentage = 0.84f;
+    private GuiStyles styles = new GuiStyles();
     #endregion
 
     #region Methods

@@ -14,8 +14,14 @@ public class NodeGraph : ScriptableObject
     public bool wantsConnection;
     public NodeBase connectionNode;
     public Vector2 mousePos;
-    public bool isInsidePropertyView;
 
+    public List<Rect> graphInputRects = new List<Rect>();
+    int curveIndex = 0;
+
+    public bool isInsidePropertyView;
+    public float zoom;
+    public float panX;
+    public float panY;
 
     void OnEnable()
     {
@@ -77,6 +83,12 @@ public class NodeGraph : ScriptableObject
                             break;
                         }
                     }
+
+                    if (node.timePointer.arrowRect.Contains(e.mousePosition))
+                    {
+                        node.timePointer.isSelected = true;
+                        node.timePointer.isMoveable = true;
+                    }
                 }
             }
 
@@ -130,6 +142,8 @@ public class NodeGraph : ScriptableObject
     private void DeselectAllNodes()
     {
         nodes.ForEach(node => node.isSelected = false);
+        nodes.ForEach(node => node.timePointer.isSelected = false);
+        nodes.ForEach(node => node.timePointer.isMoveable = false);
         selectedNodes.Clear();
         showProperties = false;
         wantsConnection = false;
@@ -177,18 +191,28 @@ public class NodeGraph : ScriptableObject
 
     private void DrawConnectionToMouse(Vector2 mousePosition)
     {
-        DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition);
+        if (this != connectionNode.parentGraph)
+        {
+            DrawUtilities.DrawCurve(new Vector3(graphInputRects[curveIndex].x + graphInputRects[curveIndex].width, graphInputRects[curveIndex].center.y, 0f), mousePosition, Color.black, 2f);
+        }
+        else
+        {
+            DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition);
+        }
     }
     
     public void DrawNodeGraphInputs(Rect viewRect, GUISkin guiSkin)
     {
         if(graphNode != null)
         {
-            for(int i = 0; i < graphNode.nodeInputs.Count; i++)
+            graphInputRects.Clear();
+            for (int i = 0; i < graphNode.nodeInputs.Count; i++)
             {
+                graphInputRects.Add(new Rect(viewRect.x, viewRect.y + (viewRect.height * (1f / (graphNode.nodeInputs.Count + 1))) * (i + 1), 32f, 64f));
                 NodeInput input = graphNode.nodeInputs[i];
                 if (GUI.Button(new Rect(viewRect.x, viewRect.y + (viewRect.height * (1f / (graphNode.nodeInputs.Count + 1))) * (i + 1), 32f, 64f), "", guiSkin.GetStyle("node_multiOutput")))
                 {
+                    curveIndex = i;
                     if (graphNode.parentGraph != null)
                     {
                         wantsConnection = true;

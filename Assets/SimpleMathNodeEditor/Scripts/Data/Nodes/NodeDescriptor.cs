@@ -4,17 +4,25 @@ using System.Collections.Generic;
 
 public class NodeDescriptor
 {
-    private NodeType nodeType { get; set; }
-    private string nodeName { get; set; }
+    public NodeType nodeType;
+    public string nodeName;
+    public string titleBarColor;
 
-    private int numberOfInputs { get; set; }
-    private int numberOfOutputs { get; set; }
+    public bool isMultiInput;
+    public bool isMultiOutput;
 
-    private int minInputs { get; set; }
-    private int maxInputs { get; set; }
-    private int minOutputs { get; set; }
-    private int maxOutputs { get; set; }
+    public int numberOfInputs;
+    public int numberOfOutputs;
 
-    private Dictionary<string,object> parameters { get; set; }
+    public int minInputs;
+    public int maxInputs;
+    public int minOutputs;
+    public int maxOutputs;
 
+    public Dictionary<string, object> parameters;
+
+    public override string ToString()
+    {
+        return nodeType + "";
+    }
 }

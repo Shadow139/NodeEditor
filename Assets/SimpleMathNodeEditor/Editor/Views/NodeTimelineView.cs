@@ -18,7 +18,6 @@ public class NodeTimelineView : ViewBaseClass
         GUI.Box(viewRect, viewTitle, viewSkin.GetStyle("bg_timeline"));
 
         GUILayout.BeginArea(viewRect);
-
         GUILayout.BeginVertical();
 
         DrawTicks(viewRect, 10, 0.6f, Color.grey, false);
@@ -28,22 +27,20 @@ public class NodeTimelineView : ViewBaseClass
         {
             foreach (NodeBase node in currentNodeGraph.nodes)
             {
-                if (node.isSelected || WorkPreferences.showTimeInfo)
+                if (node.isSelected || node.timePointer.isSelected || WorkPreferences.showTimeInfo)
                 {
-                    drawTimelineConnetion(node.nodeRect.center);
+                    drawTimelineConnetion(node.timePointer.arrowRect.center);
                 }
             }
         }
 
         GUILayout.EndVertical();
-
         GUILayout.EndArea();
     }
 
     public override void ProcessEvents(Event e)
     {
         base.ProcessEvents(e);
-
     }
 
     public void scrollViewRect(float x)
@@ -64,7 +61,6 @@ public class NodeTimelineView : ViewBaseClass
         int widthDivs = Mathf.CeilToInt(viewRect.width / gridSpacing);
 
         Handles.BeginGUI();
-
         Handles.color = gridColor;
 
         for (int x = 0; x < widthDivs; x++)

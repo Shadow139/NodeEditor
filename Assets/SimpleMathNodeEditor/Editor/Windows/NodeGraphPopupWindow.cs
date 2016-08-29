@@ -38,8 +38,9 @@ public class NodeGraphPopupWindow : EditorWindow
         {
             if (!string.IsNullOrEmpty(wantedName) && wantedName != "Enter a name...")
             {
-                NodeGraph graph = NodeUtilities.CreateAndSaveGraph(wantedName);
-                ((GraphNode)node).nodeGraph = graph;
+                NodeGraph newGraph = NodeUtilities.CreateAndSaveGraph(wantedName);
+                node.nodeGraph = newGraph;
+                newGraph.graphNode = node;
                 node.nodeName = wantedName;
 
                 currentNodePopupWindow.Close();

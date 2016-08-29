@@ -29,11 +29,6 @@ public class AdditionNode : NodeBase
         nodeRect = new Rect(10f, 10f, 150f, 100f);
     }
 
-    public override void UpdateNode(Event e, Rect viewRect)
-    {
-        base.UpdateNode(e, viewRect);
-    }
-
     public override void UpdateNodeGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
     {        
         base.UpdateNodeGUI(e, viewRect, workViewRect, guiSkin);
@@ -44,30 +39,9 @@ public class AdditionNode : NodeBase
         evaluateNode();
         DrawInputLines();
 
-        GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.5f - 10f, 20f), nodeSum.ToString(), labelGuiStyle);
-   
-        if (Handles.Button(new Vector3(nodeRect.x, nodeRect.y, 0f), Quaternion.identity, 1f, 2f, DrawFunc))
-        {
-            Debug.Log("hello");
-        }
+        GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.5f - 10f, 20f), nodeSum.ToString(), labelGuiStyle);   
     }
-
-    void DrawFunc(int controlId, Vector3 position, Quaternion rotation,float size)
-    //Draw the button
-    {
-        //You can draw other stuff than cube, but i havent found something better as a "Button" than cube
-        Handles.DrawCube(controlId, position, rotation, size);
-    } 
   
-    //deprecated 
-    public void DrawLine(NodeInput currentInput, float inputId)
-    {
-        Handles.DrawLine(new Vector3(
-            currentInput.inputNode.nodeRect.x + currentInput.inputNode.nodeRect.width + 10f,
-            currentInput.inputNode.nodeRect.y + currentInput.inputNode.nodeRect.height * 0.5f, 0f),
-            new Vector3(nodeRect.x - 10f, nodeRect.y + (nodeRect.height * 0.33f) * inputId, 0f));
-    }
-
     public override void evaluateNode()
     {
         float tempSum = 0;

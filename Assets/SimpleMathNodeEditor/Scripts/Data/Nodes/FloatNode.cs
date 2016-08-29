@@ -14,6 +14,7 @@ public class FloatNode : NodeBase
     public FloatNode()
     {
         output = new NodeOutput();
+        nodeOutputs.Add(output);
     }
 
     public override void InitNode()
@@ -23,17 +24,11 @@ public class FloatNode : NodeBase
         nodeRect = new Rect(10f, 10f, 150f, 100f);
     }
 
-    public override void UpdateNode(Event e, Rect viewRect)
-    {
-        base.UpdateNode(e, viewRect);
-    }
-
     public override void UpdateNodeGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
     {
         base.UpdateNodeGUI(e, viewRect, workViewRect, guiSkin);
 
         stringToEdit = GUI.TextField(new Rect(nodeRect.x + nodeRect.width * 0.5f + 8f, nodeRect.y + nodeRect.height * 0.5f - 10f, nodeRect.width * 0.4f, 20f), nodeValue.ToString(), 25);
-
         try
         {
             nodeValue = float.Parse(stringToEdit); // TODO handle Exception from Bad Input

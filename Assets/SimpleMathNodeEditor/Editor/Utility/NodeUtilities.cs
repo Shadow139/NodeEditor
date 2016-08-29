@@ -79,12 +79,24 @@ public static class NodeUtilities
         }
     }
 
+    public static void CreateNode(NodeGraph currentGraph, NodeDescriptor nodeDescriptor, Vector2 mousePos)
+    {
+        if (currentGraph != null)
+        {
+            NodeBase currentNode = CreateNode(nodeDescriptor);
+            positionNode(currentNode, currentGraph, mousePos);
+            saveNode(currentNode, currentGraph);
+        }
+    }
+
     public static void CreateNode(NodeGraph currentGraph, NodeType nodeType, Vector2 mousePos)
     {
         if(currentGraph != null)
         {
             NodeBase currentNode = CreateNode(nodeType);
-            initAndSaveNode(currentNode, currentGraph, mousePos);
+            currentNode.InitNode();
+            positionNode(currentNode, currentGraph, mousePos);
+            saveNode(currentNode, currentGraph);
         }
     }
 
@@ -112,7 +124,25 @@ public static class NodeUtilities
         return currentNode;
     }
 
-    public static void initAndSaveNode(NodeBase currentNode, NodeGraph currentGraph, Vector2 mousePos)
+    public static NodeBase CreateNode(NodeDescriptor descriptor)
+    {
+        NodeBase currentNode = null;
+        
+        if(descriptor.nodeType == NodeType.Graph)
+        {
+            currentNode = ScriptableObject.CreateInstance<NodeBase>();
+        }
+        else
+        {
+            currentNode = ScriptableObject.CreateInstance<NodeBase>();
+            currentNode.InitNodeFromDescriptor(descriptor);
+        }
+
+        
+        return currentNode;
+    }
+
+    public static void positionNode(NodeBase currentNode, NodeGraph currentGraph, Vector2 mousePos)
     {
         if (currentNode != null)
         {
@@ -120,8 +150,15 @@ public static class NodeUtilities
             currentNode.nodeRect.x = mousePos.x;
             currentNode.nodeRect.y = mousePos.y;
             currentNode.parentGraph = currentGraph;
+            currentNode.timePointer.arrowRect.x = (currentNode.nodeRect.x + currentNode.nodeRect.width * 0.5f) - (currentNode.timePointer.arrowRect.width * 0.5f);
             currentGraph.nodes.Add(currentNode);
+        }
+    }
 
+    public static void saveNode(NodeBase currentNode, NodeGraph currentGraph)
+    {
+        if (currentNode != null)
+        {
             AssetDatabase.AddObjectToAsset(currentNode, currentGraph);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

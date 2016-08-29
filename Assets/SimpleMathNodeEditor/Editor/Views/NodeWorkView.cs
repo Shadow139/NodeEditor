@@ -16,20 +16,20 @@ public class NodeWorkView : ViewBaseClass
 
     private List<NodeDescriptor> typesOfNodes;
 
-    float panX = 0;
-    float panY = 0;
+    private float panX = 0;
+    private float panY = 0;
 
     private const float kZoomMin = 0.7f; // max zoom out
     private const float kZoomMax = 1.0f; // max zoom in
-    private float _zoom = 1.0f;
+    public static float _zoom = 1.0f;
     private readonly Rect _zoomArea = new Rect(0.0f, 0.0f, 10000f, 10000f);
 
     #endregion
 
-
     #region Constructors
     public NodeWorkView() : base("Node View") {
         currentTimelineView = new NodeTimelineView();
+        typesOfNodes = XMLUtilities.getNodeTypes();
     }
     #endregion
 
@@ -45,6 +45,9 @@ public class NodeWorkView : ViewBaseClass
         {
             viewTitle = currentNodeGraph.graphName;
             currentNodeGraph.isInsidePropertyView = isInsidePropertyView;
+            currentNodeGraph.zoom = _zoom;
+            currentNodeGraph.panX = panX;
+            currentNodeGraph.panY = panY;
         }
         else
         {
@@ -73,8 +76,8 @@ public class NodeWorkView : ViewBaseClass
 
         GUILayout.EndArea();
 
-        currentTimelineView.UpdateView(new Rect(panX, -panY + (viewRect.height / _zoom) * 0.96f, 10000, viewRect.height / _zoom),
-                new Rect(0f, 1f, 1f, 0.05f), e, currentNodeGraph);
+        currentTimelineView.UpdateView(new Rect(panX, -panY + (viewRect.height / _zoom) - 40f, 10000, 40f / _zoom),
+                new Rect(0f, 1f, 1f, 1f), e, currentNodeGraph);
         currentTimelineView.ProcessEvents(e);
 
         EditorZoomArea.End();
@@ -99,7 +102,7 @@ public class NodeWorkView : ViewBaseClass
                         {
                             if(n.nodeType == NodeType.Graph)
                             {
-                                NodeUtilities.DisplayGraph(((GraphNode)n).nodeGraph);
+                                NodeUtilities.DisplayGraph(n.nodeGraph);
                             }
                         }
                     }
@@ -173,11 +176,10 @@ public class NodeWorkView : ViewBaseClass
         {
             if (currentNodeGraph.graphNode != null)
             {
-                if (GUI.Button(new Rect(viewRect.x + (viewRect.width * 0.5f), viewRect.y, 250f, 50f), "Step Out"))
+                if (GUI.Button(new Rect(viewRect.x + (viewRect.width * 0.5f) - panX, viewRect.y, 250f, 50f), "Step Out"))
                 {
-                    Debug.Log(((GraphNode)currentNodeGraph.graphNode).nodeGraph != null);
-                    if (((GraphNode)currentNodeGraph.graphNode).nodeGraph != null)
-                        NodeUtilities.DisplayGraph(((GraphNode)currentNodeGraph.graphNode).parentGraph);
+                    if (currentNodeGraph.graphNode.nodeGraph != null)
+                        NodeUtilities.DisplayGraph(currentNodeGraph.graphNode.parentGraph);
                 }
             } 
         }
@@ -197,20 +199,24 @@ public class NodeWorkView : ViewBaseClass
 
         if (contextMenuID == 0)
         {
-            menu.AddItem(new GUIContent("Create Graph"), false, ContextCallback, "0");
-            menu.AddItem(new GUIContent("Load Graph"), false, ContextCallback, "1");
+            menu.AddItem(new GUIContent("Create Graph"), false, ContextCallback, "createGraph");
+            menu.AddItem(new GUIContent("Load Graph"), false, ContextCallback, "loadGraph");
 
             if (currentNodeGraph != null)
             {
                 menu.AddSeparator("");
-                menu.AddItem(new GUIContent("Unload Graph"), false, ContextCallback, "2");
+                menu.AddItem(new GUIContent("Unload Graph"), false, ContextCallback, "unloadGraph");
 
                 menu.AddSeparator("");
-                menu.AddItem(new GUIContent("Add Float Node"), false, ContextCallback, "3");
-                menu.AddItem(new GUIContent("Add Addition Node"), false, ContextCallback, "4");
-                menu.AddItem(new GUIContent("Add New Graph Node"), false, ContextCallback, "5");
-                menu.AddItem(new GUIContent("Load Existing Graph Node"), false, ContextCallback, "6");
 
+                for(int i = 0; i < typesOfNodes.Count; i++)
+                {
+                    if(typesOfNodes[i].nodeName != "Group Node")
+                        menu.AddItem(new GUIContent("Add " + typesOfNodes[i].nodeName), false, ContextCallback, i);
+                }
+
+                menu.AddItem(new GUIContent("Add Graph Node"), false, ContextCallback, "i2");
+                menu.AddItem(new GUIContent("Load Existing Graph Node"), false, ContextCallback, "loadGroupNode");
             }
         }
 
@@ -218,12 +224,11 @@ public class NodeWorkView : ViewBaseClass
         {
             if (currentNodeGraph != null)
             {
-                menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, "20");
+                menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, "deleteNode");
                 if(NodeToDelete.nodeType == NodeType.Graph)
                 {
-                    menu.AddItem(new GUIContent("Step into NodeGraph"), false, ContextCallback, "21");
+                    menu.AddItem(new GUIContent("Step into NodeGraph"), false, ContextCallback, "stepIntoNode");
                 }
-
             }
 
         }
@@ -236,57 +241,63 @@ public class NodeWorkView : ViewBaseClass
     {
         switch (obj.ToString())
         {
-            case "0":
+            case "createGraph":
                 NodePopupWindow.InitNodePopup();
                 Debug.Log("Creating New Graph");
                 break;
-            case "1":
+            case "loadGraph":
                 NodeUtilities.LoadGraph();
                 Debug.Log("Loading Graph");
                 break;
-            case "2":
+            case "unloadGraph":
                 NodeUtilities.UnloadGraph();
                 Debug.Log("Unloading Graph");
-                break;
-            case "3":
+                break;                
+            case "i0":
                 NodeUtilities.CreateNode(currentNodeGraph, NodeType.Float, currentNodeGraph.mousePos);
                 Debug.Log("Float Node added");
                 break;
-            case "4":
+            case "i1":
                 NodeUtilities.CreateNode(currentNodeGraph, NodeType.Addition, currentNodeGraph.mousePos);
                 Debug.Log("Addition Node added");
                 break;
-            case "5":
+            case "i2":
                 if (currentNodeGraph != null)
                 {
-                    NodeBase currentNode = NodeUtilities.CreateNode(NodeType.Graph);
+                    //NodeBase currentNode = NodeUtilities.CreateNode(NodeType.Graph);
+                    NodeBase currentNode = NodeUtilities.CreateNode(getGroupNodeDescriptor());
                     NodeGraphPopupWindow.InitNodePopup(currentNode, currentNodeGraph);
-                    NodeUtilities.initAndSaveNode(currentNode, currentNodeGraph, currentNodeGraph.mousePos);
+                    currentNode.InitNodeFromDescriptor(getGroupNodeDescriptor());
+                    NodeUtilities.positionNode(currentNode, currentNodeGraph, currentNodeGraph.mousePos);
                 }
                 Debug.Log("New Graph Node added");
                 break;
-            case "6":
+            case "loadGroupNode":
                 if (currentNodeGraph != null)
                 {
-                    NodeBase currentNode = NodeUtilities.CreateNode(NodeType.Graph);
+                    NodeBase currentNode = NodeUtilities.CreateNode(getGroupNodeDescriptor());
                     NodeGraph graph = NodeUtilities.getSavedNodegraph();
-                    ((GraphNode)currentNode).nodeGraph = graph;
+                    currentNode.nodeGraph = graph;
                     graph.graphNode = currentNode;
                     currentNode.nodeName = graph.graphName;
-                    NodeUtilities.initAndSaveNode(currentNode, currentNodeGraph, currentNodeGraph.mousePos);
+                    currentNode.InitNodeFromDescriptor(getGroupNodeDescriptor());
+                    NodeUtilities.positionNode(currentNode, currentNodeGraph, currentNodeGraph.mousePos);
                 }
                 Debug.Log("Existing Graph Node added");
                 break;
-            case "20":
+            case "deleteNode":
                 Debug.Log("Deleting Node");
                 NodeUtilities.DeleteNode(NodeToDelete, currentNodeGraph);
                 break;
-            case "21":
+            case "stepIntoNode":
                 //step into the GraphNode
                 NodeUtilities.DisplayGraph(((GraphNode)NodeToDelete).nodeGraph);
                 Debug.Log("Stepping into NodeGraph");
                 break;
             default:
+                //Normal Node Creation from the XML Data
+                int index = Convert.ToInt16(obj.ToString());
+                NodeUtilities.CreateNode(currentNodeGraph, typesOfNodes[index], currentNodeGraph.mousePos);
                 break;
         }
     }
@@ -294,6 +305,17 @@ public class NodeWorkView : ViewBaseClass
     private void createTimeline()
     {
         currentTimelineView = new NodeTimelineView();
+    }
+
+    private NodeDescriptor getGroupNodeDescriptor()
+    {
+        foreach (NodeDescriptor n in typesOfNodes)
+        {
+            if (n.nodeName == "Group Node")
+                return n;
+        }
+
+        return null;
     }
 
     #endregion

@@ -27,10 +27,13 @@ public class NodePropertyView : ViewBaseClass
         if (currentNodeGraph == null) { }
         else
         {
-            if(currentNodeGraph.selectedNodes.Count > 0 && currentNodeGraph.showProperties)
+            if(currentNodeGraph.selectedNodes != null && currentNodeGraph.showProperties)
             {
-                currentNodeGraph.selectedNodes[currentNodeGraph.selectedNodes.Count - 1].DrawNodeProperties(viewRect, viewSkin);
-                curveX = EditorGUI.CurveField(new Rect(10, 250, viewRect.width - 20, 250), curveX);
+                if(currentNodeGraph.selectedNodes.Count > 0)
+                {
+                    currentNodeGraph.selectedNodes[currentNodeGraph.selectedNodes.Count - 1].DrawNodeProperties(viewRect, viewSkin);
+                    curveX = EditorGUI.CurveField(new Rect(10, 250, viewRect.width - 20, 250), curveX);
+                }
             }
             else if (!currentNodeGraph.showProperties)
             {
@@ -49,9 +52,13 @@ public class NodePropertyView : ViewBaseClass
                 GUILayout.Label("Snap Interval: ");
                 NodeBase.snapSize = EditorGUILayout.IntSlider((int)NodeBase.snapSize, 1, 50);
                 GUILayout.EndHorizontal();
-
             }
         }
+        GUILayout.Space(40f);
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Zoom: ");
+        NodeWorkView._zoom = EditorGUILayout.Slider(NodeWorkView._zoom, 0.7f, 1f);
+        GUILayout.EndHorizontal();
 
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();

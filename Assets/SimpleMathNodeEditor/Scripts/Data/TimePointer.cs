@@ -15,7 +15,7 @@ public class TimePointer
         arrowRect = new Rect(10f, 10f, 36f, 48f);
     }
 
-    public void drawArrow(Event e,Rect viewRect, Rect workViewRect)
+    public void drawArrow(Event e,Rect viewRect, Rect workViewRect, GUISkin guiSkin)
     {
         ProcessEvents(e, viewRect, workViewRect);
 
@@ -23,7 +23,8 @@ public class TimePointer
         arrowRect.y = (y - 40f - arrowRect.height) - parentNode.parentGraph.panY ;
 
         string currentStyle = (isSelected || parentNode.isSelected) ? "arrow_selected" : "arrow_default";
-        GUI.Box(arrowRect, "", GuiStyles._instance.guiSkin.GetStyle(currentStyle));
+
+        GUI.Box(arrowRect, "", guiSkin.GetStyle(currentStyle));
 
         if (isSelected || parentNode.isSelected)
         {

@@ -113,7 +113,7 @@ public class NodeBase : ScriptableObject
       
 
         if (timePointer != null)
-            timePointer.drawArrow(e, viewRect, workViewRect);
+            timePointer.drawArrow(e, viewRect, workViewRect, guiSkin);
 
         resizeNodeBox();
 
@@ -462,6 +462,7 @@ public class NodeBase : ScriptableObject
             for (int i = 0; i < numberOfInputsToAdd; i++)
             {
                 nodeInputs.Add(new NodeInput());
+                //numberOfInputs++;
             }
         }
     }
@@ -484,6 +485,7 @@ public class NodeBase : ScriptableObject
             for (int i = 0; i < numberOfOutputsToAdd; i++)
             {
                 nodeOutputs.Add(new NodeOutput());
+                //numberOfOutputs++;
             }
         }
     }

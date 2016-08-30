@@ -13,7 +13,7 @@ public class NodeEditorWindow : EditorWindow
     public NodeGraph currentNodeGraph;
 
     public float viewPercentage = 0.84f;
-    private GuiStyles styles = new GuiStyles();
+    private static GuiStyles styles = new GuiStyles();
     #endregion
 
     #region Methods
@@ -43,6 +43,13 @@ public class NodeEditorWindow : EditorWindow
         {
             CreateViews();
             return;
+        }
+
+        if (styles == null)
+        {
+            styles = new GuiStyles();
+            if (styles.guiSkin == null)
+                styles.GetEditorSkin();
         }
 
         Event e = Event.current;

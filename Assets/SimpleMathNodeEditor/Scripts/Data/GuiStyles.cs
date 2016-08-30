@@ -20,7 +20,7 @@ public class GuiStyles
         whiteNodeLabel.fontStyle = FontStyle.Bold;
     }
 
-    protected void GetEditorSkin()
+    public void GetEditorSkin()
     {
         guiSkin = (GUISkin)Resources.Load("GUISkins/EditorSkins/NodeEditorSkin");
     }

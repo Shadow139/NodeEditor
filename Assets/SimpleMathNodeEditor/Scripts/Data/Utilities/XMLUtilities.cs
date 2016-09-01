@@ -35,7 +35,7 @@ public class XMLUtilities
             nodeDescriptor.maxOutputs = Convert.ToInt16(node.SelectSingleNode("numberOfOutputs").Attributes.GetNamedItem("max").Value);
             nodeDescriptor.titleBarColor = node.SelectSingleNode("color").InnerText;
 
-            nodeDescriptor.parameters = new Dictionary<string, object>();
+            nodeDescriptor.parameters = new ParameterDictionary();
 
             //Loop the parameters
             foreach (XmlNode parameter in node.SelectNodes("parameters/parameter"))
@@ -43,7 +43,20 @@ public class XMLUtilities
                 string key = parameter.Attributes.GetNamedItem("key").Value;
 
                 Type type = Type.GetType(parameter.Attributes.GetNamedItem("type").Value);
-                object value = Activator.CreateInstance(type);
+                NodeParameter value = new NodeParameter();
+                if(type == typeof(float))
+                {
+                    value.floatParam = (float)Activator.CreateInstance(type);
+                }
+                if(type == typeof(string))
+                {
+                    value.stringParam = (string)Activator.CreateInstance(type);
+                }
+                if(type == typeof(Vector3))
+                {
+                    value.vectorParam = (Vector3)Activator.CreateInstance(type);
+                }
+
 
                 nodeDescriptor.parameters.Add(key,value);
             }

@@ -291,7 +291,7 @@ public class NodeWorkView : ViewBaseClass
                 break;
             case "stepIntoNode":
                 //step into the GraphNode
-                NodeUtilities.DisplayGraph(((GraphNode)NodeToDelete).nodeGraph);
+                NodeUtilities.DisplayGraph(NodeToDelete.nodeGraph);
                 Debug.Log("Stepping into NodeGraph");
                 break;
             default:

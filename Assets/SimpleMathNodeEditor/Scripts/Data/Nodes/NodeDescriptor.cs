@@ -19,7 +19,7 @@ public class NodeDescriptor
     public int minOutputs;
     public int maxOutputs;
 
-    public Dictionary<string, object> parameters;
+    public ParameterDictionary parameters;
 
     public override string ToString()
     {

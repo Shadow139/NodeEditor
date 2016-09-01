@@ -16,7 +16,7 @@ public class NodeBase : ScriptableObject
     public List<NodeOutput> nodeOutputs = new List<NodeOutput>();
     public int nodeOutputsMin;
     public int nodeOutputsMax;
-    public Dictionary<string, object> parameters;
+    public ParameterDictionary parameters;
     public string titleBarColor;
 
     public Rect nodeRect;
@@ -48,7 +48,12 @@ public class NodeBase : ScriptableObject
         timePointer.InitTimePointer();
         timePointer.parentNode = this;
 
-        parameters = new Dictionary<string, object>(descriptor.parameters);
+        parameters = new ParameterDictionary();
+        foreach (KeyValuePair<string, NodeParameter> pair in descriptor.parameters)
+        {
+            parameters.keys.Add(pair.Key);
+            parameters.values.Add(pair.Value);
+        }
 
         for(int i = 0; i < descriptor.numberOfInputs; i++)
         {
@@ -182,7 +187,7 @@ public class NodeBase : ScriptableObject
     {
         if(parameters != null)
         {
-            parameters["value"] = EditorGUILayout.FloatField("Float value", Convert.ToSingle(parameters["value"]), guiSkin.GetStyle("property_view"));
+            parameters["value"].floatParam = EditorGUILayout.FloatField("Float value", parameters["value"].floatParam, guiSkin.GetStyle("property_view"));
         }
     }
 
@@ -190,7 +195,7 @@ public class NodeBase : ScriptableObject
     {
         if (parameters != null)
         {
-            EditorGUILayout.LabelField("Value :", Convert.ToSingle(parameters["value"]).ToString());
+            EditorGUILayout.LabelField("Value :", parameters["value"].floatParam.ToString());
         }
     }
     #endregion
@@ -212,7 +217,7 @@ public class NodeBase : ScriptableObject
     {
         if (parameters != null)
         {
-            GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + ((nodeRect.height) * 0.5f) - 10f, nodeRect.width * 0.5f - 10f, 20f), Convert.ToSingle(parameters["value"]).ToString(), GuiStyles._instance.whiteNodeLabel);
+            GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + ((nodeRect.height) * 0.5f) - 10f, nodeRect.width * 0.5f - 10f, 20f), parameters["value"].floatParam.ToString(), GuiStyles._instance.whiteNodeLabel);
         }
     }
 
@@ -220,7 +225,7 @@ public class NodeBase : ScriptableObject
     {
         if (parameters != null)
         {
-            GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + ((nodeRect.height) * 0.5f) - 10f, nodeRect.width * 0.5f - 10f, 20f), Convert.ToSingle(parameters["value"]).ToString(), GuiStyles._instance.whiteNodeLabel);
+            GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + ((nodeRect.height) * 0.5f) - 10f, nodeRect.width * 0.5f - 10f, 20f), parameters["value"].floatParam.ToString(), GuiStyles._instance.whiteNodeLabel);
         }
     }
     #endregion
@@ -246,11 +251,11 @@ public class NodeBase : ScriptableObject
                 {
                     if (nodeInputs[i].inputNode.nodeType == NodeType.Float)
                     {
-                        tempSum += Convert.ToSingle(nodeInputs[i].inputNode.parameters["value"]);
+                        tempSum += nodeInputs[i].inputNode.parameters["value"].floatParam;
                     }
                     else if (nodeInputs[i].inputNode.nodeType == NodeType.Addition)
                     {
-                        tempSum += Convert.ToSingle(nodeInputs[i].inputNode.parameters["value"]);
+                        tempSum += nodeInputs[i].inputNode.parameters["value"].floatParam;
                     }
                     else if (nodeInputs[i].inputNode.nodeType == NodeType.Graph)
                     {
@@ -258,7 +263,7 @@ public class NodeBase : ScriptableObject
                     }
                 }
             }
-            parameters["value"] = tempSum;
+            parameters["value"].floatParam = tempSum;
         }
     }
     #endregion
@@ -462,7 +467,6 @@ public class NodeBase : ScriptableObject
             for (int i = 0; i < numberOfInputsToAdd; i++)
             {
                 nodeInputs.Add(new NodeInput());
-                //numberOfInputs++;
             }
         }
     }
@@ -485,7 +489,6 @@ public class NodeBase : ScriptableObject
             for (int i = 0; i < numberOfOutputsToAdd; i++)
             {
                 nodeOutputs.Add(new NodeOutput());
-                //numberOfOutputs++;
             }
         }
     }
@@ -503,6 +506,7 @@ public class NodeBase : ScriptableObject
     {
         return new Vector3(nodeRect.x + nodeRect.width * 0.5f, nodeRect.y + nodeRect.height,0f);
     }
+
     #endregion
 
 }

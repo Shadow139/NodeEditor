@@ -30,7 +30,15 @@ public class NodeTimelineView : ViewBaseClass
                 if (node.isSelected || node.timePointer.isSelected || node.timePointer.isHighlighted || WorkPreferences.showTimeInfo)
                 {
                     drawTimelineConnetion(node.timePointer.arrowRect.center);
-                    DrawTimelineAnimationLength(node.timePointer.GetStartAnimPos(), node.timePointer.GetEndAnimPos(), Color.red, 0.25f);
+                    Color col = Color.blue;
+                    if(node.nodeType == NodeType.Float)
+                    {
+                        col = Color.green;
+                    }else if(node.nodeType == NodeType.Addition)
+                    {
+                        col = Color.red;
+                    }
+                    DrawTimelineAnimationLength(node.timePointer.GetStartAnimPos(), node.timePointer.GetEndAnimPos(), col, 0.2f);
                 }
             }
         }

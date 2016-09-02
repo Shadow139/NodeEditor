@@ -27,9 +27,10 @@ public class NodeTimelineView : ViewBaseClass
         {
             foreach (NodeBase node in currentNodeGraph.nodes)
             {
-                if (node.isSelected || node.timePointer.isSelected || WorkPreferences.showTimeInfo)
+                if (node.isSelected || node.timePointer.isSelected || node.timePointer.isHighlighted || WorkPreferences.showTimeInfo)
                 {
                     drawTimelineConnetion(node.timePointer.arrowRect.center);
+                    DrawTimelineAnimationLength(node.timePointer.GetStartAnimPos(), node.timePointer.GetEndAnimPos(), Color.red, 0.25f);
                 }
             }
         }
@@ -54,6 +55,12 @@ public class NodeTimelineView : ViewBaseClass
 
         Handles.DrawLine(new Vector3(pos.x, 0f , 0f),
             new Vector3(pos.x, viewRect.height, 0f));
+    }
+
+    private void DrawTimelineAnimationLength(Vector2 start,Vector2 end, Color col, float opacity)
+    {      
+        Color newCol = new Color(col.r, col.g, col.b, opacity);
+        EditorGUI.DrawRect(new Rect(new Vector2(start.x, 0f), new Vector2(end.x - start.x, viewRect.height)),newCol);
     }
 
     public void DrawTicks(Rect viewRect, float gridSpacing, float heightOfTicks, Color gridColor,bool drawLabel)

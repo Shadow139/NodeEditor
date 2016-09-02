@@ -86,4 +86,16 @@ public static class DrawUtilities
 
         Handles.DrawBezier(start, end, startTan, endTan, col, null, thickness);
     }
+
+    public static void DrawRangeCurve(Vector3 startRange, Vector3 endRange, Vector3 nodeStartPos, Vector3 splitRangePos, Color col,float opacity ,float thickness)
+    {
+        Color opaqueCol = new Color(col.r, col.g, col.b, opacity);
+        Vector3 startTan = startRange - Vector3.up * 50;
+        Vector3 endTan = endRange - Vector3.up * 50;
+        Vector3 splitRangeTan = splitRangePos + Vector3.up * 50;
+
+        Handles.DrawBezier(nodeStartPos, splitRangePos, nodeStartPos, splitRangePos, opaqueCol, null, thickness);
+        Handles.DrawBezier(splitRangePos, startRange, splitRangeTan, startTan, opaqueCol, null, thickness);
+        Handles.DrawBezier(splitRangePos, endRange, splitRangeTan, endTan, opaqueCol, null, thickness);
+    }
 }

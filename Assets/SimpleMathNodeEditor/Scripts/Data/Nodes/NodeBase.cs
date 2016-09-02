@@ -24,7 +24,7 @@ public class NodeBase : ScriptableObject
     public NodeGraph parentGraph;
     public bool isSelected { get; set; }
     public TimePointer timePointer;
-    public TimeSpan currentTime;
+    public DragButton dragButton;
 
     protected bool multiInput = false;
     protected int numberOfInputs;
@@ -48,12 +48,18 @@ public class NodeBase : ScriptableObject
         timePointer.InitTimePointer();
         timePointer.parentNode = this;
 
+        dragButton = new DragButton();
+        dragButton.InitDragButton();
+        
         parameters = new ParameterDictionary();
         foreach (KeyValuePair<string, NodeParameter> pair in descriptor.parameters)
         {
             parameters.keys.Add(pair.Key);
+            Debug.Log(pair.Key);
             parameters.values.Add(pair.Value);
         }
+
+        parameters = descriptor.parameters;
 
         for(int i = 0; i < descriptor.numberOfInputs; i++)
         {
@@ -97,6 +103,50 @@ public class NodeBase : ScriptableObject
                 }
             }
         }
+
+        if (nodeRect.Contains(e.mousePosition))
+        {
+            timePointer.isHighlighted = true;
+        }
+        else
+        {
+            timePointer.isHighlighted = false;
+        }
+        if (dragButton.middleButtonRect.Contains(e.mousePosition))
+        {
+            if(e.button == 0 && e.type == EventType.MouseDown)
+            {
+                if (e.shift)
+                    isSelected = true;
+
+                timePointer.isMoveable = true;
+                timePointer.isSelected = true;
+            }
+        }
+
+        if (dragButton.leftButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.isMoveable)
+        {
+            if (e.button == 0 &&  e.type == EventType.MouseDrag)
+            {
+                timePointer.resizeStartOffset = true;
+                timePointer.isSelected = true;
+            }
+        }
+        if (dragButton.rightButtonRect.Contains(e.mousePosition) && !timePointer.resizeStartOffset && !timePointer.isMoveable)
+        {
+            if (e.button == 0 && e.type == EventType.MouseDrag)
+            {
+                timePointer.resizeEndOffset = true;
+                timePointer.isSelected = true;
+            }
+        }
+
+        if (e.button == 0 && e.type == EventType.MouseUp)
+        {
+            timePointer.isMoveable = false;
+            timePointer.resizeStartOffset = false;
+            timePointer.resizeEndOffset = false;
+        }
     }
 
     public virtual void UpdateNodeGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
@@ -128,6 +178,8 @@ public class NodeBase : ScriptableObject
         DrawInputLines();
 
         DrawNodeBoxInsideByType(viewRect);
+
+        DrawMoveButtons(e, guiSkin);
 
         EditorUtility.SetDirty(this);
     }
@@ -307,7 +359,10 @@ public class NodeBase : ScriptableObject
             DrawUtilities.DrawMultiInputNodeCurve(currentInput.inputNode.nodeRect, nodeRect, 1);
         }
     }
-
+    public void DrawMoveButtons(Event e, GUISkin guiSkin)
+    {
+        dragButton.DrawDragButton(e, nodeRect, guiSkin);
+    }
     public void drawInputHandles(GUISkin guiSkin)
     {
         if (multiInput)
@@ -422,8 +477,7 @@ public class NodeBase : ScriptableObject
     
     protected void DrawCurrentTimePosition()
     {
-        TimeSpan t = TimeSpan.FromMilliseconds(timePointer.arrowRect.center.x * 100);
-        currentTime = t;
+        TimeSpan t = TimeSpan.FromMilliseconds((timePointer.GetEndAnimPos().x * 100) - (timePointer.GetStartAnimPos().x * 100));
         string str = string.Format("{0:D2}m:{1:D2}s:{2:D2}ms",
                 t.Minutes,
                 t.Seconds,

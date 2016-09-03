@@ -8,7 +8,6 @@ public class DragButton
     public Rect middleButtonRect;
     public Rect rightButtonRect;
 
-
     public void InitDragButton()
     {
         leftButtonRect = new Rect(10f, 10f, 36f, 48f);

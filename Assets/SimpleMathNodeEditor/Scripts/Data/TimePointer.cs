@@ -31,7 +31,7 @@ public class TimePointer
 
         string currentStyle = (isSelected || parentNode.isSelected) ? "arrow_selected" : "arrow_default";
 
-        GUI.Box(arrowRect, "", guiSkin.GetStyle(currentStyle));
+        //GUI.Box(arrowRect, "", guiSkin.GetStyle(currentStyle));
 
         if (isSelected || parentNode.isSelected || isHighlighted) { opacity = 1f; } else { opacity = 0.2f; }
 

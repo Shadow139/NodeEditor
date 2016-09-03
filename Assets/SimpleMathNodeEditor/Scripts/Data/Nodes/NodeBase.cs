@@ -54,9 +54,13 @@ public class NodeBase : ScriptableObject
         parameters = new ParameterDictionary();
         foreach (KeyValuePair<string, NodeParameter> pair in descriptor.parameters)
         {
+            NodeParameter tempParameter = new NodeParameter();
+            tempParameter.floatParam = pair.Value.floatParam;
+            tempParameter.stringParam = pair.Value.stringParam;
+            tempParameter.vectorParam = new Vector3(pair.Value.vectorParam.x, pair.Value.vectorParam.y, pair.Value.vectorParam.z);
+
             parameters.keys.Add(pair.Key);
-            Debug.Log(pair.Key);
-            parameters.values.Add(pair.Value);
+            parameters.values.Add(tempParameter);
         }
 
         parameters = descriptor.parameters;

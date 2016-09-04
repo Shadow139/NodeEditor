@@ -269,6 +269,7 @@ public class NodeWorkView : ViewBaseClass
                     NodeGraphPopupWindow.InitNodePopup(currentNode, currentNodeGraph);
                     currentNode.InitNodeFromDescriptor(getGroupNodeDescriptor());
                     NodeUtilities.positionNode(currentNode, currentNodeGraph, currentNodeGraph.mousePos);
+                    NodeUtilities.saveNode(currentNode, currentNodeGraph);
                 }
                 Debug.Log("New Graph Node added");
                 break;
@@ -282,6 +283,7 @@ public class NodeWorkView : ViewBaseClass
                     currentNode.nodeName = graph.graphName;
                     currentNode.InitNodeFromDescriptor(getGroupNodeDescriptor());
                     NodeUtilities.positionNode(currentNode, currentNodeGraph, currentNodeGraph.mousePos);
+                    NodeUtilities.saveNode(currentNode, currentNodeGraph);
                 }
                 Debug.Log("Existing Graph Node added");
                 break;

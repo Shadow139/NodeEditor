@@ -186,6 +186,8 @@ public class NodeGraph : ScriptableObject
             showProperties = true;
         }
 
+        DrawNodeToOutputCurve(viewRect);
+
         EditorUtility.SetDirty(this);
     }
 
@@ -193,12 +195,33 @@ public class NodeGraph : ScriptableObject
     {
         if (this != connectionNode.parentGraph)
         {
-            DrawUtilities.DrawCurve(new Vector3(graphInputRects[curveIndex].x + graphInputRects[curveIndex].width, graphInputRects[curveIndex].center.y, 0f), mousePosition, Color.black, 2f);
+            if (graphInputRects.Count > curveIndex)
+            {
+                DrawUtilities.DrawCurve(new Vector3(graphInputRects[curveIndex].x + graphInputRects[curveIndex].width, graphInputRects[curveIndex].center.y, 0f), mousePosition, Color.black, 2f);
+            }
         }
         else
         {
             DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition);
         }
+    }
+    //Draws Curve from a Node to the right Output Handles
+    public void DrawNodeToOutputCurve(Rect viewRect)
+    {
+        if (graphNode != null)
+        {
+            for (int i = 0; i < graphNode.nodeOutputs.Count; i++)
+            {
+                if (graphNode.nodeOutputs[i].outputNode!= null)
+                {
+                    Vector3 outputCurvePoint = new Vector3(graphNode.nodeOutputs[i].outputNode.nodeOutputs[0].rect.x + graphNode.nodeOutputs[i].outputNode.nodeOutputs[0].rect.width * 0.5f,
+                                                           graphNode.nodeOutputs[i].outputNode.nodeOutputs[0].rect.y + graphNode.nodeOutputs[i].outputNode.nodeOutputs[0].rect.height * 0.5f);
+                    Vector3 inputCurvePoint = new Vector3(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f) + 60f);
+                    DrawUtilities.DrawCurve(outputCurvePoint, inputCurvePoint , Color.black, 2f);
+                }
+            }
+        }
+
     }
     
     public void DrawNodeGraphInputs(Rect viewRect, GUISkin guiSkin)
@@ -229,15 +252,45 @@ public class NodeGraph : ScriptableObject
         {
             if (GUI.Button(new Rect(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f), 32f, 120f), "", guiSkin.GetStyle("node_multiInput")))
             {
-                int i = graphNode.nodeOutputs.Count;
-                graphNode.nodeOutputs.Add(new NodeOutput());
+                if (wantsConnection)
+                {
+                    for (int k = 0; k < graphNode.nodeOutputs.Count; k++)
+                    {
+                        if (graphNode.nodeOutputs[k].outputNode == null && graphNode.nodeOutputs[k].isOccupied == false)
+                        {
+                            graphNode.nodeOutputs[k].outputNode = connectionNode;
+                            graphNode.nodeOutputs[k].isOccupied = graphNode.nodeOutputs[k].outputNode != null;
 
-                graphNode.nodeOutputs[i].outputNode = connectionNode;
-                graphNode.nodeOutputs[i].isOccupied = graphNode.nodeOutputs[i].outputNode != null;
+                            wantsConnection = false;
+                            connectionNode = null;
+                            Debug.Log("Connected to GroupNode Output at: " + k);
 
-                wantsConnection = false;
-                connectionNode = null;
+                            return;
+                        }
+                    }
+
+                    if (graphNode.numberOfOutputs < graphNode.nodeOutputsMax)
+                    {
+                        int i = graphNode.nodeOutputs.Count;
+                        graphNode.numberOfOutputs = i + 1;
+                        graphNode.nodeOutputs.Add(new NodeOutput());
+                        graphNode.nodeOutputs[i].outputNode = connectionNode;
+                        graphNode.nodeOutputs[i].isOccupied = graphNode.nodeOutputs[i].outputNode != null;
+                        Debug.Log("Increased Output of GroupNode and Connected");
+                    }
+                    
+                    wantsConnection = false;
+                    connectionNode = null;
+                }
+                else
+                {
+                    Debug.Log("Removing Group Node Outputs");
+                    graphNode.nodeOutputs = new List<NodeOutput>();
+                    graphNode.numberOfOutputs = graphNode.nodeOutputs.Count;
+                }
             }
+            GUI.Label(new Rect(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f), 32f, 120f), graphNode.nodeOutputs.Count + "", guiSkin.GetStyle("std_whiteText"));
+
         }
     }
 }

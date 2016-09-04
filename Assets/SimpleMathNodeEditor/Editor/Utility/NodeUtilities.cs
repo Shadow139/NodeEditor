@@ -137,8 +137,7 @@ public static class NodeUtilities
             currentNode = ScriptableObject.CreateInstance<NodeBase>();
             currentNode.InitNodeFromDescriptor(descriptor);
         }
-
-        
+                
         return currentNode;
     }
 

@@ -27,8 +27,8 @@ public class NodeBase : ScriptableObject
     public DragButton dragButton;
 
     protected bool multiInput = false;
-    protected int numberOfInputs;
-    private int numberOfOutputs;
+    public int numberOfInputs;
+    public int numberOfOutputs;
     public static float snapSize = 10;
 
     public NodeGraph nodeGraph;
@@ -59,11 +59,10 @@ public class NodeBase : ScriptableObject
             tempParameter.stringParam = pair.Value.stringParam;
             tempParameter.vectorParam = new Vector3(pair.Value.vectorParam.x, pair.Value.vectorParam.y, pair.Value.vectorParam.z);
 
-            parameters.keys.Add(pair.Key);
-            parameters.values.Add(tempParameter);
+            //parameters.keys.Add(pair.Key);
+            //parameters.values.Add(tempParameter);
+            parameters.Add(pair.Key, tempParameter);
         }
-
-        parameters = descriptor.parameters;
 
         for(int i = 0; i < descriptor.numberOfInputs; i++)
         {
@@ -346,20 +345,30 @@ public class NodeBase : ScriptableObject
 
     protected void DrawNodeConnection(NodeInput currentInput, float inputId)
     {
+        //Draws NodeCurves between nodes in the highest parentGraph and single Input Handles
         if (!multiInput && currentInput.inputNode.parentGraph == parentGraph)
-        {
+        {        
             DrawUtilities.DrawNodeCurve(currentInput.inputNode.nodeRect, nodeRect, inputId, nodeInputs.Count);
-        }else if(currentInput.inputNode.parentGraph != parentGraph)
+        }
+        else if(currentInput.inputNode.parentGraph != parentGraph)//Draws NodeCurves between the leftside Handles of a child Graph to the Nodes
         {
-            int i = parentGraph.graphNode.nodeInputs.FindIndex(a => a.inputNode == currentInput.inputNode);
-            if(i >= 0)
+            if (parentGraph.graphNode != null)
             {
-               Rect r = parentGraph.graphInputRects[i];
-               DrawUtilities.DrawNodeCurve(new Vector3(r.x + r.width, r.center.y, 0f), nodeRect, inputId, nodeInputs.Count);
+                int i = parentGraph.graphNode.nodeInputs.FindIndex(a => a.inputNode == currentInput.inputNode);
+                if(i >= 0)
+                {
+                   Rect r = parentGraph.graphInputRects[i];
+                   DrawUtilities.DrawNodeCurve(new Vector3(r.x + r.width, r.center.y, 0f), nodeRect, inputId, nodeInputs.Count);
+                }
+            }
+            else
+            {                
+                DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeRect, nodeRect, inputId, nodeInputs.Count);
             }
         }
         else
         {
+            //Draws the MultiInput Curve between single Outputs to MultiInputs
             DrawUtilities.DrawMultiInputNodeCurve(currentInput.inputNode.nodeRect, nodeRect, 1);
         }
     }
@@ -396,7 +405,7 @@ public class NodeBase : ScriptableObject
                         if (numberOfInputs < nodeInputsMax)
                         {
                             int i = nodeInputs.Count;
-                            numberOfInputs = nodeInputs.Count + 1;
+                            numberOfInputs = i + 1;
                             nodeInputs.Add(new NodeInput());
                             nodeInputs[i].inputNode = parentGraph.connectionNode;
                             nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
@@ -414,16 +423,15 @@ public class NodeBase : ScriptableObject
                     }
                 }
             }
-
             GUI.Label(new Rect(nodeRect.x - 20f, nodeRect.y + ((nodeRect.height + 25f) * 0.5f) - 10f, nodeRect.width * 0.2f - 10f, 20f), nodeInputs.Count + "", guiSkin.GetStyle("std_whiteText"));
-
         }
         else
         {
             //Single Input Circles
             for (int i = 0; i < nodeInputs.Count; i++)
             {
-                if (GUI.Button(new Rect(nodeRect.x - 10f, nodeRect.y + (nodeRect.height * (1f / (nodeInputs.Count + 1))) * (i + 1) - 10f, 20f, 20f), "", guiSkin.GetStyle("node_input")))
+                nodeInputs[i].rect = new Rect(nodeRect.x - 10f, nodeRect.y + (nodeRect.height * (1f / (nodeInputs.Count + 1))) * (i + 1) - 10f, 20f, 20f);
+                if (GUI.Button(nodeInputs[i].rect, "", guiSkin.GetStyle("node_input")))
                 {
                     if (parentGraph != null)
                     {
@@ -467,12 +475,24 @@ public class NodeBase : ScriptableObject
         {
             for (int i = 0; i < nodeOutputs.Count; i++)
             {
-                if (GUI.Button(new Rect(nodeRect.x + nodeRect.width - 10f, nodeRect.y + (nodeRect.height * (1f / (nodeOutputs.Count + 1))) * (i + 1) - 10f, 20f, 20f), "", guiSkin.GetStyle("node_output")))
+                nodeOutputs[i].rect = new Rect(nodeRect.x + nodeRect.width - 10f, nodeRect.y + (nodeRect.height * (1f / (nodeOutputs.Count + 1))) * (i + 1) - 10f, 20f, 20f);
+                if (GUI.Button(nodeOutputs[i].rect, "", guiSkin.GetStyle("node_output")))
                 {
                     if (parentGraph != null)
                     {
-                        parentGraph.wantsConnection = true;
-                        parentGraph.connectionNode = this;
+                        if(nodeType == NodeType.Graph)
+                        {
+                            if (nodeOutputs[i].outputNode != null)
+                            {
+                                parentGraph.wantsConnection = true;
+                                parentGraph.connectionNode = nodeOutputs[i].outputNode;
+                            }
+                        }
+                        else
+                        {
+                            parentGraph.wantsConnection = true;
+                            parentGraph.connectionNode = this;
+                        }
                     }
                 }
             }

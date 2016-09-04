@@ -195,13 +195,19 @@ public class NodeGraph : ScriptableObject
     {
         if (this != connectionNode.parentGraph)
         {
+            //Draw Curve from Leftside Inputs to Mouse
             if (graphInputRects.Count > curveIndex)
             {
-                DrawUtilities.DrawCurve(new Vector3(graphInputRects[curveIndex].x + graphInputRects[curveIndex].width, graphInputRects[curveIndex].center.y, 0f), mousePosition, Color.black, 2f);
+                DrawUtilities.DrawCurve(new Vector3(graphInputRects[curveIndex].x + graphInputRects[curveIndex].width, graphInputRects[curveIndex].center.y, 0f), mousePosition, Color.red, 2f);
+            }
+            else
+            {
+                //Draw out of the GroupNode to Mouse
+                DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition);
             }
         }
         else
-        {
+        {            
             DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition);
         }
     }

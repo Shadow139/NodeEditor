@@ -89,35 +89,10 @@ public class NodeBase : ScriptableObject
 
     private void ProcessEvents(Event e, Rect viewRect, Rect workViewRect)
     {
-        if (isSelected)
-        {
-            if (workViewRect.Contains(e.mousePosition) && !parentGraph.isInsidePropertyView)
-            {
-                if (e.button == 0 && e.type == EventType.MouseDrag)
-                {
-                    Rect rect = nodeRect;
 
-                    rect.x += e.delta.x;
-                    rect.y += e.delta.y;
-
-                    rect.position = snap(rect.position, snapSize);
-
-                    nodeRect = rect;
-                }
-            }
-        }
-
-        if (nodeRect.Contains(e.mousePosition))
+        if (dragButton.middleButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.resizeStartOffset)
         {
-            timePointer.isHighlighted = true;
-        }
-        else
-        {
-            timePointer.isHighlighted = false;
-        }
-        if (dragButton.middleButtonRect.Contains(e.mousePosition))
-        {
-            if(e.button == 0 && e.type == EventType.MouseDown)
+            if (e.button == 0 && e.type == EventType.MouseDrag)
             {
                 if (e.shift)
                     isSelected = true;
@@ -129,7 +104,7 @@ public class NodeBase : ScriptableObject
 
         if (dragButton.leftButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.isMoveable)
         {
-            if (e.button == 0 &&  e.type == EventType.MouseDrag)
+            if (e.button == 0 && e.type == EventType.MouseDrag)
             {
                 timePointer.resizeStartOffset = true;
                 timePointer.isSelected = true;
@@ -144,6 +119,37 @@ public class NodeBase : ScriptableObject
             }
         }
 
+        if (isSelected)
+        {
+            if (workViewRect.Contains(e.mousePosition) && !parentGraph.isInsidePropertyView)
+            {
+                if (e.button == 0 && e.type == EventType.MouseDrag)
+                {
+                    Rect rect = nodeRect;
+
+                    rect.x += e.delta.x;
+                    rect.y += e.delta.y;
+
+                    rect.position = snap(rect.position, snapSize);
+
+                    nodeRect = rect;
+
+                    timePointer.isMoveable = false;
+                    timePointer.resizeStartOffset = false;
+                    timePointer.resizeEndOffset = false;
+                }
+            }
+        }
+
+        if (nodeRect.Contains(e.mousePosition))
+        {
+            timePointer.isHighlighted = true;
+        }
+        else
+        {
+            timePointer.isHighlighted = false;
+        }
+        
         if (e.button == 0 && e.type == EventType.MouseUp)
         {
             timePointer.isMoveable = false;
@@ -266,22 +272,29 @@ public class NodeBase : ScriptableObject
         {
             DrawAdditionNodeInsides();
         }
+        else if (nodeType == NodeType.Graph)
+        {
+            DrawGraphNodeInsides();
+        }
     }
 
     private void DrawFloatNodeInsides()
     {
         if (parameters != null)
-        {
             GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + ((nodeRect.height) * 0.5f) - 10f, nodeRect.width * 0.5f - 10f, 20f), parameters["value"].floatParam.ToString(), GuiStyles._instance.whiteNodeLabel);
-        }
     }
 
     private void DrawAdditionNodeInsides()
     {
         if (parameters != null)
-        {
             GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 10f, nodeRect.y + ((nodeRect.height) * 0.5f) - 10f, nodeRect.width * 0.5f - 10f, 20f), parameters["value"].floatParam.ToString(), GuiStyles._instance.whiteNodeLabel);
-        }
+    }
+
+    private void DrawGraphNodeInsides()
+    {
+        if(nodeGraph != null)
+            GUI.Label(new Rect(nodeRect.x + 10f, nodeRect.y + ((nodeRect.height) * 0.5f) - 10f, nodeRect.width - 10f, 20f), nodeGraph.graphName, GuiStyles._instance.whiteNodeLabel);
+        
     }
     #endregion
 
@@ -465,7 +478,11 @@ public class NodeBase : ScriptableObject
                 if (parentGraph != null)
                 {
                     parentGraph.wantsConnection = true;
-                    parentGraph.connectionNode = this;
+                    parentGraph.connectionNodes = new List<NodeBase>();
+                    foreach(NodeOutput n in nodeOutputs)
+                    {
+                        parentGraph.connectionNodes.Add(n.outputNode);
+                    }
                 }
             }
 

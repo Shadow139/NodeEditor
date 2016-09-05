@@ -13,6 +13,7 @@ public class NodeGraph : ScriptableObject
     public bool showProperties;
     public bool wantsConnection;
     public NodeBase connectionNode;
+    public List<NodeBase> connectionNodes;
     public Vector2 mousePos;
 
     public List<Rect> graphInputRects = new List<Rect>();

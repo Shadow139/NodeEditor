@@ -117,6 +117,15 @@ public class NodeGraph : ScriptableObject
                 Debug.Log("align Nodes Vertically " + selectedNodes.Count);
                 alignNodesVertically();
             }
+
+            if (e.keyCode == KeyCode.Space && e.type == EventType.KeyUp)
+            {
+                if(selectedNodes != null)
+                {
+                    if(selectedNodes.Count > 0)
+                        printGraph(selectedNodes[0]);
+                }
+            }
         }
     }
 
@@ -128,8 +137,6 @@ public class NodeGraph : ScriptableObject
         {
             selectedNodes[i].nodeRect.center = new Vector2(x, selectedNodes[i].nodeRect.center.y);
         }
-
-        printGraph(nodes[0]);
     }
 
     private void alignNodesVertically()
@@ -338,9 +345,8 @@ public class NodeGraph : ScriptableObject
     }
 
     public void printGraph(NodeBase node)
-    {
+    {      
         Debug.Log(node.nodeName);
-
         foreach(NodeOutput child in node.nodeOutputs)
         {
             NodeBase nextNode = child.connectedToNode;

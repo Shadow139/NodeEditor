@@ -362,7 +362,7 @@ public class NodeBase : ScriptableObject
         //Draws NodeCurves between nodes in the highest parentGraph and single Input Handles
         if (!multiInput && currentInput.inputNode.parentGraph == parentGraph)
         {
-            DrawUtilities.DrawNodeCurve(currentInput.connectionOutput.rect, currentInput.rect, Color.red, 2f);
+            DrawUtilities.DrawNodeCurve(currentInput.connectionToOutput.rect, currentInput.rect, Color.red, 2f);
         }
         else if(currentInput.inputNode.parentGraph != parentGraph)//Draws NodeCurves between the leftside Handles of a child Graph to the Nodes
         {
@@ -378,7 +378,7 @@ public class NodeBase : ScriptableObject
             else
             {                
                 //DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeRect, nodeRect, inputId, nodeInputs.Count);
-                DrawUtilities.DrawNodeCurve(currentInput.connectionOutput.rect, currentInput.rect, Color.green, 2f);
+                DrawUtilities.DrawNodeCurve(currentInput.connectionToOutput.rect, currentInput.rect, Color.green, 2f);
             }
         }
         else
@@ -442,16 +442,21 @@ public class NodeBase : ScriptableObject
             //Single Input Circles
             for (int i = 0; i < nodeInputs.Count; i++)
             {
-                nodeInputs[i].rect = new Rect(nodeRect.x - 10f, nodeRect.y + (nodeRect.height * (1f / (nodeInputs.Count + 1))) * (i + 1) - 10f, 20f, 20f);
+                nodeInputs[i].rect.x = nodeRect.x - 10f;
+                nodeInputs[i].rect.y = nodeRect.y + (nodeRect.height * (1f / (nodeInputs.Count + 1))) * (i + 1) - 10f;
+                nodeInputs[i].position = i;
+
                 if (GUI.Button(nodeInputs[i].rect, "", guiSkin.GetStyle("node_input")))
                 {
                     if (parentGraph != null)
                     {
                         if (parentGraph.wantsConnection)
                         {
-                            nodeInputs[i].inputNode = parentGraph.connectionNode;
+                            nodeInputs[i].inputNode = parentGraph.connectionOutput.outputNode;
                             nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
-                            nodeInputs[i].connectionOutput = parentGraph.connectionOutput;
+                            nodeInputs[i].connectionToOutput = parentGraph.connectionOutput;
+
+                            parentGraph.connectionOutput.connectedToNode = this;
 
                             parentGraph.wantsConnection = false;
                             parentGraph.connectionNode = null;
@@ -459,10 +464,10 @@ public class NodeBase : ScriptableObject
                         }
                         else
                         {
-                            Debug.Log("Removing InputHandle #" + i);
+                            Debug.Log("Removing Connection #" + i);
                             nodeInputs[i].inputNode = null;
                             nodeInputs[i].isOccupied = false;
-                            nodeInputs[i].connectionOutput = null;
+                            nodeInputs[i].connectionToOutput = null;
                         }
                     }
                 }
@@ -495,7 +500,10 @@ public class NodeBase : ScriptableObject
         {
             for (int i = 0; i < nodeOutputs.Count; i++)
             {
-                nodeOutputs[i].rect = new Rect(nodeRect.x + nodeRect.width - 10f, nodeRect.y + (nodeRect.height * (1f / (nodeOutputs.Count + 1))) * (i + 1) - 10f, 20f, 20f);
+                nodeOutputs[i].rect.x = nodeRect.x + nodeRect.width - 10f;
+                nodeOutputs[i].rect.y = nodeRect.y + (nodeRect.height * (1f / (nodeOutputs.Count + 1))) * (i + 1) - 10f;
+                nodeOutputs[i].position = i;
+
                 if (GUI.Button(nodeOutputs[i].rect, "", guiSkin.GetStyle("node_output")))
                 {
                     if (parentGraph != null)
@@ -505,8 +513,7 @@ public class NodeBase : ScriptableObject
                             if (nodeOutputs[i].outputNode != null)
                             {
                                 parentGraph.wantsConnection = true;
-                                parentGraph.connectionNode = nodeOutputs[i].outputNode;
-                                //parentGraph.connectionRect = nodeOutputs[i].rect;
+                                parentGraph.connectionNode = nodeOutputs[i].outputNode;                                
                                 parentGraph.connectionOutput = nodeOutputs[i];
                             }
                         }
@@ -514,7 +521,6 @@ public class NodeBase : ScriptableObject
                         {
                             parentGraph.wantsConnection = true;
                             parentGraph.connectionNode = this;
-                            //parentGraph.connectionRect = nodeOutputs[i].rect;
                             parentGraph.connectionOutput = nodeOutputs[i];
                         }
                     }

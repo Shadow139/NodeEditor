@@ -128,6 +128,8 @@ public class NodeGraph : ScriptableObject
         {
             selectedNodes[i].nodeRect.center = new Vector2(x, selectedNodes[i].nodeRect.center.y);
         }
+
+        printGraph(nodes[0]);
     }
 
     private void alignNodesVertically()
@@ -334,4 +336,17 @@ public class NodeGraph : ScriptableObject
 
         }
     }
+
+    public void printGraph(NodeBase node)
+    {
+        Debug.Log(node.nodeName);
+
+        foreach(NodeOutput child in node.nodeOutputs)
+        {
+            NodeBase nextNode = child.connectedToNode;
+            if(nextNode != null)
+                printGraph(nextNode); //<-- recursive
+        }
+    }
 }
+

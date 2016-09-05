@@ -7,15 +7,17 @@ using System.Collections.Generic;
 public class NodeGraph : ScriptableObject
 {
     public string graphName = "New Graph";
+    public Vector2 mousePos;
     public List<NodeBase> nodes;
     public List<NodeBase> selectedNodes;
     public NodeBase graphNode = null;
+
     public bool showProperties;
     public bool wantsConnection;
     public NodeBase connectionNode;
     public List<NodeBase> connectionNodes;
     public Rect connectionRect;
-    public Vector2 mousePos;
+    public NodeOutput connectionOutput;
 
     public List<Rect> graphInputRects = new List<Rect>();
     int curveIndex = 0;
@@ -151,7 +153,7 @@ public class NodeGraph : ScriptableObject
         wantsConnection = false;
         connectionNode = null;
         connectionNodes = null;
-        connectionRect = new Rect();
+        connectionOutput = null;
     }
 
     public void UpdateGraphGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
@@ -262,7 +264,7 @@ public class NodeGraph : ScriptableObject
             }
         }
     }
-    
+    //Leftside Green
     public void DrawNodeGraphInputs(Rect viewRect, GUISkin guiSkin)
     {
         if(graphNode != null)
@@ -284,7 +286,7 @@ public class NodeGraph : ScriptableObject
             }
         }
     }
-
+    //Rightside Red
     public void DrawNodeGraphOutputs(Rect viewRect, GUISkin guiSkin)
     {
         if (graphNode != null)

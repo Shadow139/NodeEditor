@@ -361,8 +361,8 @@ public class NodeBase : ScriptableObject
     {
         //Draws NodeCurves between nodes in the highest parentGraph and single Input Handles
         if (!multiInput && currentInput.inputNode.parentGraph == parentGraph)
-        {        
-            DrawUtilities.DrawNodeCurve(currentInput.connectionNodeRect, currentInput.rect, Color.black, 2f);
+        {
+            DrawUtilities.DrawNodeCurve(currentInput.connectionOutput.rect, currentInput.rect, Color.red, 2f);
         }
         else if(currentInput.inputNode.parentGraph != parentGraph)//Draws NodeCurves between the leftside Handles of a child Graph to the Nodes
         {
@@ -377,7 +377,8 @@ public class NodeBase : ScriptableObject
             }
             else
             {                
-                DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeRect, nodeRect, inputId, nodeInputs.Count);
+                //DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeRect, nodeRect, inputId, nodeInputs.Count);
+                DrawUtilities.DrawNodeCurve(currentInput.connectionOutput.rect, currentInput.rect, Color.green, 2f);
             }
         }
         else
@@ -450,7 +451,7 @@ public class NodeBase : ScriptableObject
                         {
                             nodeInputs[i].inputNode = parentGraph.connectionNode;
                             nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
-                            nodeInputs[i].connectionNodeRect = parentGraph.connectionRect;
+                            nodeInputs[i].connectionOutput = parentGraph.connectionOutput;
 
                             parentGraph.wantsConnection = false;
                             parentGraph.connectionNode = null;
@@ -461,7 +462,7 @@ public class NodeBase : ScriptableObject
                             Debug.Log("Removing InputHandle #" + i);
                             nodeInputs[i].inputNode = null;
                             nodeInputs[i].isOccupied = false;
-                            nodeInputs[i].connectionNodeRect = new Rect();
+                            nodeInputs[i].connectionOutput = null;
                         }
                     }
                 }
@@ -505,14 +506,16 @@ public class NodeBase : ScriptableObject
                             {
                                 parentGraph.wantsConnection = true;
                                 parentGraph.connectionNode = nodeOutputs[i].outputNode;
-                                parentGraph.connectionRect = nodeOutputs[i].rect;
+                                //parentGraph.connectionRect = nodeOutputs[i].rect;
+                                parentGraph.connectionOutput = nodeOutputs[i];
                             }
                         }
                         else
                         {
                             parentGraph.wantsConnection = true;
                             parentGraph.connectionNode = this;
-                            parentGraph.connectionRect = nodeOutputs[i].rect;
+                            //parentGraph.connectionRect = nodeOutputs[i].rect;
+                            parentGraph.connectionOutput = nodeOutputs[i];
                         }
                     }
                 }

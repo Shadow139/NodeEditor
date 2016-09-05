@@ -92,36 +92,6 @@ public class NodeBase : ScriptableObject
 
     private void ProcessEvents(Event e, Rect viewRect, Rect workViewRect)
     {
-
-        if (dragButton.middleButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.resizeStartOffset)
-        {
-            if (e.button == 0 && e.type == EventType.MouseDrag)
-            {
-                if (e.shift)
-                    isSelected = true;
-
-                timePointer.isMoveable = true;
-                timePointer.isSelected = true;
-            }
-        }
-
-        if (dragButton.leftButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.isMoveable)
-        {
-            if (e.button == 0 && e.type == EventType.MouseDrag)
-            {
-                timePointer.resizeStartOffset = true;
-                timePointer.isSelected = true;
-            }
-        }
-        if (dragButton.rightButtonRect.Contains(e.mousePosition) && !timePointer.resizeStartOffset && !timePointer.isMoveable)
-        {
-            if (e.button == 0 && e.type == EventType.MouseDrag)
-            {
-                timePointer.resizeEndOffset = true;
-                timePointer.isSelected = true;
-            }
-        }
-
         if (isSelected)
         {
             if (workViewRect.Contains(e.mousePosition) && !parentGraph.isInsidePropertyView)
@@ -136,10 +106,38 @@ public class NodeBase : ScriptableObject
                     rect.position = snap(rect.position, snapSize);
 
                     nodeRect = rect;
+                }
+            }
+        }
 
-                    timePointer.isMoveable = false;
-                    timePointer.resizeStartOffset = false;
-                    timePointer.resizeEndOffset = false;
+        if (!isSelected)
+        {
+            if (dragButton.middleButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.resizeStartOffset)
+            {
+                if (e.button == 0 && e.type == EventType.MouseDrag)
+                {
+                    if (e.shift)
+                        isSelected = true;
+
+                    timePointer.isMoveable = true;
+                    timePointer.isSelected = true;
+                }
+            }
+
+            if (dragButton.leftButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.isMoveable)
+            {
+                if (e.button == 0 && e.type == EventType.MouseDrag)
+                {
+                    timePointer.resizeStartOffset = true;
+                    timePointer.isSelected = true;
+                }
+            }
+            if (dragButton.rightButtonRect.Contains(e.mousePosition) && !timePointer.resizeStartOffset && !timePointer.isMoveable)
+            {
+                if (e.button == 0 && e.type == EventType.MouseDrag)
+                {
+                    timePointer.resizeEndOffset = true;
+                    timePointer.isSelected = true;
                 }
             }
         }
@@ -226,10 +224,10 @@ public class NodeBase : ScriptableObject
         }
 
         if (!multiInput)
-        {
-            resizeInputHandles(numberOfInputs);
+            resizeInputHandles(numberOfInputs);        
+
+        if(!multiOutput)
             resizeOutputHandles(numberOfOutputs);
-        }
     }
 
     #region Node Drawing Helper Methods
@@ -364,7 +362,7 @@ public class NodeBase : ScriptableObject
         //Draws NodeCurves between nodes in the highest parentGraph and single Input Handles
         if (!multiInput && currentInput.inputNode.parentGraph == parentGraph)
         {        
-            DrawUtilities.DrawNodeCurve(currentInput.inputNode.nodeRect, nodeRect, inputId, nodeInputs.Count);
+            DrawUtilities.DrawNodeCurve(currentInput.connectionNodeRect, currentInput.rect, Color.black, 2f);
         }
         else if(currentInput.inputNode.parentGraph != parentGraph)//Draws NodeCurves between the leftside Handles of a child Graph to the Nodes
         {
@@ -388,7 +386,7 @@ public class NodeBase : ScriptableObject
             DrawUtilities.DrawMultiInputNodeCurve(currentInput.inputNode.nodeRect, nodeRect, 1);
         }
     }
-
+    //Draws the Inputhandles of the Node (Leftside Red Handles)
     public void drawInputHandles(GUISkin guiSkin)
     {
         if (multiInput)
@@ -452,6 +450,7 @@ public class NodeBase : ScriptableObject
                         {
                             nodeInputs[i].inputNode = parentGraph.connectionNode;
                             nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
+                            nodeInputs[i].connectionNodeRect = parentGraph.connectionRect;
 
                             parentGraph.wantsConnection = false;
                             parentGraph.connectionNode = null;
@@ -462,6 +461,7 @@ public class NodeBase : ScriptableObject
                             Debug.Log("Removing InputHandle #" + i);
                             nodeInputs[i].inputNode = null;
                             nodeInputs[i].isOccupied = false;
+                            nodeInputs[i].connectionNodeRect = new Rect();
                         }
                     }
                 }
@@ -469,6 +469,7 @@ public class NodeBase : ScriptableObject
         }
     }
 
+    //Draws Outputhandles of the Node (Rightside Green Handles)
     public void drawOutputHandles(GUISkin guiSkin)
     {
         if (multiOutput)
@@ -504,12 +505,14 @@ public class NodeBase : ScriptableObject
                             {
                                 parentGraph.wantsConnection = true;
                                 parentGraph.connectionNode = nodeOutputs[i].outputNode;
+                                parentGraph.connectionRect = nodeOutputs[i].rect;
                             }
                         }
                         else
                         {
                             parentGraph.wantsConnection = true;
                             parentGraph.connectionNode = this;
+                            parentGraph.connectionRect = nodeOutputs[i].rect;
                         }
                     }
                 }
@@ -534,7 +537,7 @@ public class NodeBase : ScriptableObject
 
     private void resizeNodeBox()
     {
-        if (!multiInput)
+        if (!multiInput && !multiOutput)
         {
             int size = nodeInputs.Count > nodeOutputs.Count ? nodeInputs.Count : nodeOutputs.Count;
             nodeRect.height = 40f + (30f * size);

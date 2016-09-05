@@ -14,6 +14,7 @@ public class NodeGraph : ScriptableObject
     public bool wantsConnection;
     public NodeBase connectionNode;
     public List<NodeBase> connectionNodes;
+    public Rect connectionRect;
     public Vector2 mousePos;
 
     public List<Rect> graphInputRects = new List<Rect>();
@@ -150,6 +151,7 @@ public class NodeGraph : ScriptableObject
         wantsConnection = false;
         connectionNode = null;
         connectionNodes = null;
+        connectionRect = new Rect();
     }
 
     public void UpdateGraphGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)

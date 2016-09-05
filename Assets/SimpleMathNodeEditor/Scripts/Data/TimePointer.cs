@@ -28,11 +28,7 @@ public class TimePointer
 
         float y = viewRect.height / parentNode.parentGraph.zoom;
         arrowRect.y = (y - 40f - arrowRect.height) - parentNode.parentGraph.panY ;
-
-        string currentStyle = (isSelected || parentNode.isSelected) ? "arrow_selected" : "arrow_default";
-
-        //GUI.Box(arrowRect, "", guiSkin.GetStyle(currentStyle));
-
+        
         if (isSelected || parentNode.isSelected || isHighlighted) { opacity = 1f; } else { opacity = 0.2f; }
 
         if (isSelected || parentNode.isSelected)

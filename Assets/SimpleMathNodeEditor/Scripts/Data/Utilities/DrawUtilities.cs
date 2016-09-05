@@ -59,7 +59,7 @@ public static class DrawUtilities
         Handles.DrawBezier(start, endPos, startTan, endTan, Color.black, null, 2);
     }
 
-    public static void DrawMouseCurve(Rect start, Vector3 mousePosition)
+    public static void DrawMouseCurve(Rect start, Vector3 mousePosition, float thickness)
     {
         Vector3 startPos = new Vector3(start.x + start.width + 10f, start.y + start.height * 0.5f, 0);
         Vector3 endPos = mousePosition;
@@ -70,7 +70,7 @@ public static class DrawUtilities
         for (int i = 0; i < 3; i++) // Draw a shadow
             Handles.DrawBezier(startPos, endPos, startTan, endTan, shadowCol, null, (i + 1) * 5);
 
-        Handles.DrawBezier(startPos, endPos, startTan, endTan, Color.black, null, 2);
+        Handles.DrawBezier(startPos, endPos, startTan, endTan, Color.black, null, thickness);
     }
 
     public static void DrawCurve(Vector3 start, Vector3 end, Color col, float thickness)
@@ -95,5 +95,27 @@ public static class DrawUtilities
         Handles.DrawBezier(nodeStartPos, splitRangePos, nodeStartPos, splitRangePos, opaqueCol, null, thickness);
         Handles.DrawBezier(splitRangePos, startRange, splitRangeTan, startTan, opaqueCol, null, thickness);
         Handles.DrawBezier(splitRangePos, endRange, splitRangeTan, endTan, opaqueCol, null, thickness);
+    }
+
+    public static void DrawGrid(Rect viewRect, float gridSpacing, Color gridColor)
+    {
+        int widthDivs = Mathf.CeilToInt(viewRect.width / gridSpacing);
+        int heightDivs = Mathf.CeilToInt(viewRect.height / gridSpacing);
+
+        Handles.BeginGUI();
+
+        Handles.color = gridColor;
+
+        for (int x = 0; x < widthDivs; x++)
+        {
+            Handles.DrawLine(new Vector3(gridSpacing * x, 0f, 0f), new Vector3(gridSpacing * x, viewRect.height, 0f));
+        }
+
+        for (int y = 0; y < heightDivs; y++)
+        {
+            Handles.DrawLine(new Vector3(0f, gridSpacing * y, 0f), new Vector3(viewRect.width, gridSpacing * y, 0f));
+        }
+
+        Handles.EndGUI();
     }
 }

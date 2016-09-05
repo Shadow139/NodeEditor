@@ -149,6 +149,7 @@ public class NodeGraph : ScriptableObject
         showProperties = false;
         wantsConnection = false;
         connectionNode = null;
+        connectionNodes = null;
     }
 
     public void UpdateGraphGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
@@ -168,7 +169,7 @@ public class NodeGraph : ScriptableObject
             }
         }
 
-        if (wantsConnection && connectionNode != null)
+        if (wantsConnection && (connectionNode != null || connectionNodes != null))
         {
             DrawConnectionToMouse(e.mousePosition);
 
@@ -194,24 +195,54 @@ public class NodeGraph : ScriptableObject
 
     private void DrawConnectionToMouse(Vector2 mousePosition)
     {
-        if (this != connectionNode.parentGraph)
+        NodeBase temp = null;
+
+        if(connectionNode == null)
         {
-            //Draw Curve from Leftside Inputs to Mouse
-            if (graphInputRects.Count > curveIndex)
+            temp = connectionNodes[0];
+        }
+        else if(connectionNodes == null)
+        {
+            temp = connectionNode;
+        }
+
+        if(temp != null)
+        {
+            if (this != temp.parentGraph)
             {
-                DrawUtilities.DrawCurve(new Vector3(graphInputRects[curveIndex].x + graphInputRects[curveIndex].width, graphInputRects[curveIndex].center.y, 0f), mousePosition, Color.red, 2f);
+                //Draw Curve from Leftside Inputs to Mouse
+                if (graphInputRects.Count > curveIndex)
+                {
+                    DrawUtilities.DrawCurve(new Vector3(graphInputRects[curveIndex].x + graphInputRects[curveIndex].width, 
+                                            graphInputRects[curveIndex].center.y, 0f), mousePosition, Color.red, 2f);
+                }
+                else
+                {
+                    if(connectionNode != null)
+                    {
+                        //Draw out of the GroupNode to Mouse
+                        DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition, 2f);
+                    }
+                    else if (connectionNodes != null)
+                    {
+                        DrawUtilities.DrawMouseCurve(connectionNodes[0].nodeRect, mousePosition, connectionNodes.Count + 2);
+                    }
+                }
             }
             else
             {
-                //Draw out of the GroupNode to Mouse
-                DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition);
+                if(connectionNode != null)
+                {
+                    DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition, 2f);
+                }
+                else if (connectionNodes != null)
+                {               
+                    DrawUtilities.DrawMouseCurve(connectionNodes[0].nodeRect, mousePosition, connectionNodes.Count + 2);
+                }
             }
         }
-        else
-        {            
-            DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition);
-        }
     }
+
     //Draws Curve from a Node to the right Output Handles
     public void DrawNodeToOutputCurve(Rect viewRect)
     {
@@ -228,7 +259,6 @@ public class NodeGraph : ScriptableObject
                 }
             }
         }
-
     }
     
     public void DrawNodeGraphInputs(Rect viewRect, GUISkin guiSkin)

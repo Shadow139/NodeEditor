@@ -26,7 +26,8 @@ public class NodeBase : ScriptableObject
     public TimePointer timePointer;
     public DragButton dragButton;
 
-    protected bool multiInput = false;
+    private bool multiInput = false;
+    private bool multiOutput = false;
     public int numberOfInputs;
     public int numberOfOutputs;
     public static float snapSize = 10;
@@ -74,6 +75,8 @@ public class NodeBase : ScriptableObject
         for (int i = 0; i < descriptor.numberOfOutputs; i++)
         {
             nodeOutputs.Add(new NodeOutput());
+            if(nodeType != NodeType.Graph)
+                nodeOutputs[i].outputNode = this;
         }
         numberOfOutputs = descriptor.numberOfOutputs;
         nodeOutputsMin = descriptor.minOutputs;
@@ -172,9 +175,7 @@ public class NodeBase : ScriptableObject
         GUI.Box(new Rect(nodeRect.x, nodeRect.y, nodeRect.width, 27f), nodeName, guiSkin.GetStyle((currentStyle + "_titlebar_" + titleBarColor)));
         GUI.Box(new Rect(nodeRect.x, nodeRect.y + nodeRect.height - 27f, nodeRect.width, 27f), "", guiSkin.GetStyle(currentStyle));
 
-        //if (isSelected || timePointer.isSelected || WorkPreferences.showTimeInfo)
-        DrawCurrentTimePosition();
-      
+        DrawCurrentTimePosition();      
 
         if (timePointer != null)
             timePointer.drawArrow(e, viewRect, workViewRect, guiSkin);
@@ -188,7 +189,7 @@ public class NodeBase : ScriptableObject
 
         DrawNodeBoxInsideByType(viewRect);
 
-        DrawMoveButtons(e, guiSkin);
+        dragButton.DrawDragButton(e, nodeRect, guiSkin);
 
         EditorUtility.SetDirty(this);
     }
@@ -199,7 +200,9 @@ public class NodeBase : ScriptableObject
         GUILayout.Space(6);
         multiInput = EditorGUILayout.Toggle("Multi Input", multiInput);
         GUILayout.Space(6);
-        
+        multiOutput = EditorGUILayout.Toggle("Multi Output", multiOutput);
+        GUILayout.Space(6);
+
         if (nodeInputsMin != nodeInputsMax)
         {
             GUILayout.BeginVertical();
@@ -385,10 +388,7 @@ public class NodeBase : ScriptableObject
             DrawUtilities.DrawMultiInputNodeCurve(currentInput.inputNode.nodeRect, nodeRect, 1);
         }
     }
-    public void DrawMoveButtons(Event e, GUISkin guiSkin)
-    {
-        dragButton.DrawDragButton(e, nodeRect, guiSkin);
-    }
+
     public void drawInputHandles(GUISkin guiSkin)
     {
         if (multiInput)
@@ -471,7 +471,7 @@ public class NodeBase : ScriptableObject
 
     public void drawOutputHandles(GUISkin guiSkin)
     {
-        if (multiInput)
+        if (multiOutput)
         {
             if (GUI.Button(new Rect(nodeRect.x + nodeRect.width, nodeRect.y + ((nodeRect.height + 25f) * 0.5f) - 25f, 24f, 50f), "", guiSkin.GetStyle("node_multiOutput")))
             {
@@ -483,6 +483,7 @@ public class NodeBase : ScriptableObject
                     {
                         parentGraph.connectionNodes.Add(n.outputNode);
                     }
+                    Debug.Log(parentGraph.connectionNodes.Count);
                 }
             }
 

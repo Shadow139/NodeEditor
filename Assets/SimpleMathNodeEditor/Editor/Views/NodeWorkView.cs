@@ -9,11 +9,10 @@ public class NodeWorkView : ViewBaseClass
     #region Variables
     private Vector2 mousePos;
     private Rect workSpaceRect;
-    protected NodeBase NodeToDelete;
+    private NodeBase NodeToDelete;
     public bool isInsidePropertyView;
 
-    public NodeTimelineView currentTimelineView;
-
+    private NodeTimelineView currentTimelineView;
     private List<NodeDescriptor> typesOfNodes;
 
     private float panX = 0;
@@ -39,8 +38,8 @@ public class NodeWorkView : ViewBaseClass
         base.UpdateView(editorRect, percentageRect, e, nodeGraph);
 
         if(currentTimelineView == null)
-            createTimeline();
-        
+            currentTimelineView = new NodeTimelineView();
+
         if (currentNodeGraph != null)
         {
             viewTitle = currentNodeGraph.graphName;
@@ -49,10 +48,7 @@ public class NodeWorkView : ViewBaseClass
             currentNodeGraph.panX = panX;
             currentNodeGraph.panY = panY;
         }
-        else
-        {
-            viewTitle = "No Graph Loaded.";
-        }
+        else{   viewTitle = "No Graph Loaded.";     }
 
         workSpaceRect = new Rect(panX, panY, 10000, 10000);
 
@@ -62,8 +58,8 @@ public class NodeWorkView : ViewBaseClass
         GUI.Box(new Rect(0, 0, 10000, 10000), viewTitle, viewSkin.GetStyle("bg_view"));
 
         //Draw a Grid
-        NodeUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingDark, EditorPreferences.gridColorOuter);
-        NodeUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingLight, EditorPreferences.gridColorInner);
+        DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingDark, EditorPreferences.gridColorOuter);
+        DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingLight, EditorPreferences.gridColorInner);
 
         GUILayout.BeginArea(new Rect(0, 0, 10000, 10000));
 
@@ -81,7 +77,6 @@ public class NodeWorkView : ViewBaseClass
         currentTimelineView.ProcessEvents(e);
 
         EditorZoomArea.End();
-
         GUI.EndGroup();
     }
 
@@ -159,9 +154,10 @@ public class NodeWorkView : ViewBaseClass
 
         if(e.keyCode == KeyCode.Delete)
         {
-
+            //TODO Delete Selected Nodes
         }
 
+        //Limit Panning Outside of Bounds
         if (panX > 0)
             panX = 0;
 
@@ -169,9 +165,9 @@ public class NodeWorkView : ViewBaseClass
             panY = 0;
     }
 
+    //Draws The StepOut Button to return to the previous Graph
     public void DrawStepOutOfNode(Rect viewRect)
     {
-
         if (currentNodeGraph != null)
         {
             if (currentNodeGraph.graphNode != null)
@@ -189,7 +185,6 @@ public class NodeWorkView : ViewBaseClass
     {
         return (screenCoords - _zoomArea.TopLeft()) / _zoom + mousePos;
     }
-
     #endregion
 
     #region Utilities
@@ -215,7 +210,7 @@ public class NodeWorkView : ViewBaseClass
                         menu.AddItem(new GUIContent("Add " + typesOfNodes[i].nodeName), false, ContextCallback, i);
                 }
 
-                menu.AddItem(new GUIContent("Add Graph Node"), false, ContextCallback, "i2");
+                menu.AddItem(new GUIContent("Add Graph Node"), false, ContextCallback, "createGroupNode");
                 menu.AddItem(new GUIContent("Load Existing Graph Node"), false, ContextCallback, "loadGroupNode");
             }
         }
@@ -232,7 +227,6 @@ public class NodeWorkView : ViewBaseClass
             }
 
         }
-
         menu.ShowAsContext();
         e.Use();
     }
@@ -253,18 +247,9 @@ public class NodeWorkView : ViewBaseClass
                 NodeUtilities.UnloadGraph();
                 Debug.Log("Unloading Graph");
                 break;                
-            case "i0":
-                NodeUtilities.CreateNode(currentNodeGraph, NodeType.Float, currentNodeGraph.mousePos);
-                Debug.Log("Float Node added");
-                break;
-            case "i1":
-                NodeUtilities.CreateNode(currentNodeGraph, NodeType.Addition, currentNodeGraph.mousePos);
-                Debug.Log("Addition Node added");
-                break;
-            case "i2":
+            case "createGroupNode":
                 if (currentNodeGraph != null)
                 {
-                    //NodeBase currentNode = NodeUtilities.CreateNode(NodeType.Graph);
                     NodeBase currentNode = NodeUtilities.CreateNode(getGroupNodeDescriptor());
                     NodeGraphPopupWindow.InitNodePopup(currentNode, currentNodeGraph);
                     currentNode.InitNodeFromDescriptor(getGroupNodeDescriptor());
@@ -292,21 +277,15 @@ public class NodeWorkView : ViewBaseClass
                 NodeUtilities.DeleteNode(NodeToDelete, currentNodeGraph);
                 break;
             case "stepIntoNode":
-                //step into the GraphNode
                 NodeUtilities.DisplayGraph(NodeToDelete.nodeGraph);
                 Debug.Log("Stepping into NodeGraph");
                 break;
             default:
-                //Normal Node Creation from the XML Data
+                //Normal Node Creation from the XML Data Get the index of the XML NodeDescriptor and create a node
                 int index = Convert.ToInt16(obj.ToString());
                 NodeUtilities.CreateNode(currentNodeGraph, typesOfNodes[index], currentNodeGraph.mousePos);
                 break;
         }
-    }
-
-    private void createTimeline()
-    {
-        currentTimelineView = new NodeTimelineView();
     }
 
     private NodeDescriptor getGroupNodeDescriptor()
@@ -316,7 +295,6 @@ public class NodeWorkView : ViewBaseClass
             if (n.nodeName == "Group Node")
                 return n;
         }
-
         return null;
     }
 

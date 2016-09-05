@@ -26,11 +26,11 @@ public class XMLUtilities
             nodeDescriptor = new NodeDescriptor();
             nodeDescriptor.nodeType = (NodeType)Convert.ToInt16(node.Attributes.GetNamedItem("type").Value);
             nodeDescriptor.nodeName = node.Attributes.GetNamedItem("name").Value;
-            nodeDescriptor.numberOfInputs = Convert.ToInt16(node.SelectSingleNode("numberOfInputs").InnerText);
+            nodeDescriptor.numberOfInputs = Convert.ToInt16(node.SelectSingleNode("numberOfInputs").Attributes.GetNamedItem("default").Value);
             nodeDescriptor.minInputs = Convert.ToInt16(node.SelectSingleNode("numberOfInputs").Attributes.GetNamedItem("min").Value);
             nodeDescriptor.maxInputs = Convert.ToInt16(node.SelectSingleNode("numberOfInputs").Attributes.GetNamedItem("max").Value);
             
-            nodeDescriptor.numberOfOutputs = Convert.ToInt16(node.SelectSingleNode("numberOfOutputs").InnerText);
+            nodeDescriptor.numberOfOutputs = Convert.ToInt16(node.SelectSingleNode("numberOfOutputs").Attributes.GetNamedItem("default").Value);
             nodeDescriptor.minOutputs= Convert.ToInt16(node.SelectSingleNode("numberOfOutputs").Attributes.GetNamedItem("min").Value);
             nodeDescriptor.maxOutputs = Convert.ToInt16(node.SelectSingleNode("numberOfOutputs").Attributes.GetNamedItem("max").Value);
             nodeDescriptor.titleBarColor = node.SelectSingleNode("color").InnerText;

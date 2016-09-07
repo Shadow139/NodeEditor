@@ -31,23 +31,31 @@ public class TimePointer
         
         if (isSelected || parentNode.isSelected || isHighlighted) { opacity = 1f; } else { opacity = 0.2f; }
 
-        if (isSelected || parentNode.isSelected)
+        if (isSelected || parentNode.isSelected || isHighlighted)
         {
-            DrawConnectionToNode(Color.red);
+            DrawConnectionToNode(true);
         }else
         {
-            DrawConnectionToNode(Color.black);
+            DrawConnectionToNode(false);
         }
     }
 
-    private void DrawConnectionToNode(Color col)
+    private void DrawConnectionToNode(bool highlighted)
     {
         Handles.BeginGUI();
+
+        if (highlighted)// Draw Shadow if highlighted
+        {
+            DrawUtilities.DrawRangeCurveShadow(GetStartAnimPos(), GetEndAnimPos(),
+                                 parentNode.getLowerCenter(),
+                                 new Vector3(arrowRect.x + arrowRect.width * 0.5f, arrowRect.y - 150f, 0f),
+                                 parentNode.getColorByNodeType(), opacity, 3);
+        }
 
         DrawUtilities.DrawRangeCurve(GetStartAnimPos(), GetEndAnimPos(),
                              parentNode.getLowerCenter(),
                              new Vector3(arrowRect.x + arrowRect.width * 0.5f, arrowRect.y - 150f, 0f),
-                             Color.blue, opacity, 3);
+                             parentNode.getColorByNodeType(), opacity, 3);
         Handles.EndGUI();
     }
 

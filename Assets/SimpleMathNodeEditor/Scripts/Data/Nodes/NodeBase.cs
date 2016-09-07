@@ -362,7 +362,7 @@ public class NodeBase : ScriptableObject
         //Draws NodeCurves between nodes in the highest parentGraph and single Input Handles
         if (!multiInput && currentInput.inputNode.parentGraph == parentGraph)
         {
-            DrawUtilities.DrawNodeCurve(currentInput.connectionToOutput.rect, currentInput.rect, Color.red, 2f);
+            DrawUtilities.DrawNodeCurve(currentInput.getOutputPos(), currentInput.rect, Color.red, 2f);
         }
         else if(currentInput.inputNode.parentGraph != parentGraph)//Draws NodeCurves between the leftside Handles of a child Graph to the Nodes
         {
@@ -376,9 +376,13 @@ public class NodeBase : ScriptableObject
                 }
             }
             else
-            {                
+            {
+                if (true)
+                {
+                    DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeOutputs[currentInput.outputPos].rect, currentInput.rect, Color.blue, 2f);
+                }
                 //DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeRect, nodeRect, inputId, nodeInputs.Count);
-                DrawUtilities.DrawNodeCurve(currentInput.connectionToOutput.rect, currentInput.rect, Color.green, 2f);
+                //DrawUtilities.DrawNodeCurve(currentInput.getOutputPos(), currentInput.rect, Color.green, 2f);
             }
         }
         else
@@ -439,7 +443,7 @@ public class NodeBase : ScriptableObject
         }
         else
         {
-            //Single Input Circles
+            //Single Input Circles(red)
             for (int i = 0; i < nodeInputs.Count; i++)
             {
                 nodeInputs[i].rect.x = nodeRect.x - 10f;
@@ -451,11 +455,12 @@ public class NodeBase : ScriptableObject
                     if (parentGraph != null)
                     {
                         if (parentGraph.wantsConnection)
-                        {
+                        {                          
                             nodeInputs[i].inputNode = parentGraph.connectionOutput.outputNode;
                             nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
-                            nodeInputs[i].connectionToOutput = parentGraph.connectionOutput;
+                            nodeInputs[i].outputPos = parentGraph.connectionOutput.position;
 
+                            nodeInputs[i].inputNode.nodeOutputs[nodeInputs[i].outputPos].connectedToNode = this;
                             parentGraph.connectionOutput.connectedToNode = this;
 
                             parentGraph.wantsConnection = false;
@@ -467,7 +472,6 @@ public class NodeBase : ScriptableObject
                             Debug.Log("Removing Connection #" + i);
                             nodeInputs[i].inputNode = null;
                             nodeInputs[i].isOccupied = false;
-                            nodeInputs[i].connectionToOutput = null;
                         }
                     }
                 }
@@ -498,6 +502,7 @@ public class NodeBase : ScriptableObject
         }
         else
         {
+            //Single Output Circles (green)
             for (int i = 0; i < nodeOutputs.Count; i++)
             {
                 nodeOutputs[i].rect.x = nodeRect.x + nodeRect.width - 10f;
@@ -613,6 +618,52 @@ public class NodeBase : ScriptableObject
     public Vector3 getLowerCenter()
     {
         return new Vector3(nodeRect.x + nodeRect.width * 0.5f, nodeRect.y + nodeRect.height,0f);
+    }
+
+    public Color getColorByNodeType()
+    {
+        Color col = Color.grey;
+
+        switch (titleBarColor)
+        {
+            case "red":
+                col = Color.red;
+                break;
+            case "blue":
+                col = Color.blue;
+                break;
+            case "green":
+                col = Color.green;
+                break;
+            case "lightblue":
+                col = new Color(135f / 255f, 206f / 255f, 235f / 255f, 1f);
+                break;
+            case "violet":
+                col = new Color(186f / 255f, 85f / 255f, 211f / 255f, 1f); ;
+                break;
+            case "solid_blue":
+                col = Color.blue;
+                break;
+            case "solid_green":
+                col = Color.green;
+                break;
+            case "solid_red":
+                col = Color.red;
+                break;
+            case "solid_orange":
+                col = new Color(255f / 255f, 165f / 255f, 0f / 255f, 1f); ;
+                break;
+            case "solid_lightblue":
+                col = new Color(135f / 255f, 206f / 255f, 235f / 255f, 1f);
+                break;
+            case "solid_violet":
+                col = new Color(186f / 255f, 85f / 255f, 211f / 255f, 1f); ;
+                break;
+            default:
+                break;
+        }
+
+        return col;
     }
 
     #endregion

@@ -290,6 +290,7 @@ public class NodeGraph : ScriptableObject
                     {
                         wantsConnection = true;
                         connectionNode = input.inputNode;
+                        connectionOutput = input.inputNode.nodeOutputs[input.outputPos];
                     }
                 }
             }
@@ -310,6 +311,7 @@ public class NodeGraph : ScriptableObject
                         {
                             graphNode.nodeOutputs[k].outputNode = connectionNode;
                             graphNode.nodeOutputs[k].isOccupied = graphNode.nodeOutputs[k].outputNode != null;
+                            //graphNode.nodeOutputs[k].position = k;
 
                             wantsConnection = false;
                             connectionNode = null;
@@ -346,7 +348,7 @@ public class NodeGraph : ScriptableObject
 
     public void printGraph(NodeBase node)
     {      
-        Debug.Log(node.nodeName);
+        Debug.Log(node.nodeName + " -> " + node.parameters["value"].floatParam);
         foreach(NodeOutput child in node.nodeOutputs)
         {
             NodeBase nextNode = child.connectedToNode;

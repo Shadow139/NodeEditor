@@ -9,4 +9,10 @@ public class NodeOutput
     public int position;
     public NodeBase outputNode;
     public NodeBase connectedToNode;
+
+    public void updatePosition()
+    {
+        rect.x = outputNode.nodeRect.x - 10f;
+        rect.y = outputNode.nodeRect.y + (outputNode.nodeRect.height * (1f / (outputNode.nodeInputs.Count + 1))) * (position + 1) - 10f;
+    }
 }

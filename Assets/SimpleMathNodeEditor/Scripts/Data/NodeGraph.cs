@@ -16,7 +16,6 @@ public class NodeGraph : ScriptableObject
     public bool wantsConnection;
     public NodeBase connectionNode;
     public List<NodeBase> connectionNodes;
-    public Rect connectionRect;
     public NodeOutput connectionOutput;
 
     public List<Rect> graphInputRects = new List<Rect>();
@@ -163,6 +162,7 @@ public class NodeGraph : ScriptableObject
         connectionNode = null;
         connectionNodes = null;
         connectionOutput = null;
+        curveIndex = -1;
     }
 
     public void UpdateGraphGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
@@ -224,17 +224,17 @@ public class NodeGraph : ScriptableObject
             if (this != temp.parentGraph)
             {
                 //Draw Curve from Leftside Inputs to Mouse
-                if (graphInputRects.Count > curveIndex)
+                if (graphInputRects.Count > curveIndex && curveIndex != -1)
                 {
                     DrawUtilities.DrawCurve(new Vector3(graphInputRects[curveIndex].x + graphInputRects[curveIndex].width, 
                                             graphInputRects[curveIndex].center.y, 0f), mousePosition, Color.red, 2f);
                 }
                 else
                 {
-                    if(connectionNode != null)
+                    if(connectionNode != null || connectionOutput != null)
                     {
                         //Draw out of the GroupNode to Mouse
-                        DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition, 2f);
+                        DrawUtilities.DrawMouseCurve(connectionOutput.outputNode.parentGraph.graphNode.nodeOutputs[connectionOutput.position].rect, mousePosition, 2f);
                     }
                     else if (connectionNodes != null)
                     {
@@ -244,9 +244,9 @@ public class NodeGraph : ScriptableObject
             }
             else
             {
-                if(connectionNode != null)
+                if(connectionNode != null || connectionOutput != null)
                 {
-                    DrawUtilities.DrawMouseCurve(connectionNode.nodeRect, mousePosition, 2f);
+                    DrawUtilities.DrawMouseCurve(connectionOutput.rect, mousePosition, 2f);
                 }
                 else if (connectionNodes != null)
                 {               

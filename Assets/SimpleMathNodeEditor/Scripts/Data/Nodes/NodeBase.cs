@@ -82,6 +82,9 @@ public class NodeBase : ScriptableObject
         nodeOutputsMin = descriptor.minOutputs;
         nodeOutputsMax = descriptor.maxOutputs;
 
+        multiInput = descriptor.isMultiInput;
+        multiOutput = descriptor.isMultiOutput;
+
         nodeRect = new Rect(10f, 10f, 150f, 100f);
     }
 
@@ -360,33 +363,53 @@ public class NodeBase : ScriptableObject
     protected void DrawNodeConnection(NodeInput currentInput, float inputId)
     {
         //Draws NodeCurves between nodes in the highest parentGraph and single Input Handles
-        if (!multiInput && currentInput.inputNode.parentGraph == parentGraph)
+        if (!currentInput.inputNode.multiOutput && !multiInput && currentInput.inputNode.parentGraph == parentGraph)
         {
             DrawUtilities.DrawNodeCurve(currentInput.getOutputPos(), currentInput.rect, Color.red, 2f);
+        }
+        else if (currentInput.inputNode.parentGraph == parentGraph && currentInput.inputNode.multiOutput)
+        {
+            DrawUtilities.DrawNodeCurve(currentInput.inputNode.getMultiOutputRect(), currentInput.rect, Color.white, 2f);
         }
         else if(currentInput.inputNode.parentGraph != parentGraph)//Draws NodeCurves between the leftside Handles of a child Graph to the Nodes
         {
             if (parentGraph.graphNode != null)
             {
                 int i = parentGraph.graphNode.nodeInputs.FindIndex(a => a.inputNode == currentInput.inputNode);
-                if(i >= 0)
+                //Debug.Log(i + ": " + currentInput.inputNode.parentGraph.graphName + "  -  " + parentGraph.graphName);
+
+                if (i >= 0)
                 {
-                   Rect r = parentGraph.graphInputRects[i];
-                   DrawUtilities.DrawNodeCurve(new Vector3(r.x + r.width, r.center.y, 0f), nodeRect, inputId, nodeInputs.Count);
+                    Rect r = parentGraph.graphInputRects[i];
+                    DrawUtilities.DrawNodeCurve(new Vector3(r.x + r.width, r.center.y, 0f), nodeRect, inputId, nodeInputs.Count);
+                }
+                else
+                {
+                    if (currentInput.inputNode.parentGraph.graphNode.multiOutput)
+                    {
+                        DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.getMultiOutputRect(), currentInput.rect, Color.white, 2f);
+                    }
+                    else
+                    {
+                        DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeOutputs[currentInput.outputPos].rect, currentInput.rect, Color.blue, 2f);
+                    }
                 }
             }
             else
             {
-                if (true)
+                if (currentInput.inputNode.parentGraph.graphNode.multiOutput)
+                {
+                    DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.getMultiOutputRect(), currentInput.rect, Color.white, 2f);
+                }
+                else
                 {
                     DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeOutputs[currentInput.outputPos].rect, currentInput.rect, Color.blue, 2f);
                 }
-                //DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeRect, nodeRect, inputId, nodeInputs.Count);
-                //DrawUtilities.DrawNodeCurve(currentInput.getOutputPos(), currentInput.rect, Color.green, 2f);
             }
         }
         else
         {
+
             //Draws the MultiInput Curve between single Outputs to MultiInputs
             DrawUtilities.DrawMultiInputNodeCurve(currentInput.inputNode.nodeRect, nodeRect, 1);
         }
@@ -517,6 +540,7 @@ public class NodeBase : ScriptableObject
                         {
                             if (nodeOutputs[i].outputNode != null)
                             {
+                                Debug.Log("herro");
                                 parentGraph.wantsConnection = true;
                                 parentGraph.connectionNode = nodeOutputs[i].outputNode;                                
                                 parentGraph.connectionOutput = nodeOutputs[i];
@@ -618,6 +642,11 @@ public class NodeBase : ScriptableObject
     public Vector3 getLowerCenter()
     {
         return new Vector3(nodeRect.x + nodeRect.width * 0.5f, nodeRect.y + nodeRect.height,0f);
+    }
+
+    public Rect getMultiOutputRect()
+    {
+        return new Rect(nodeRect.x + nodeRect.width, nodeRect.y + ((nodeRect.height + 25f) * 0.5f) - 25f, 24f, 50f);
     }
 
     public Color getColorByNodeType()

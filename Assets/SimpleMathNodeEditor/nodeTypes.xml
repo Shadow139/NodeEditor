@@ -3,7 +3,8 @@
   <Node name="Float Node" type="0">
     <numberOfInputs min="0" max="0" default="0" />
     <numberOfOutputs min="1" max="1" default="1" />
-    <color>green</color>
+    <inputType multiInput="false" multiOutput="false" />
+    <color>green</color>    
     <parameters>
 		<parameter key="value" type="System.Single" value="0.5"/>		
 	</parameters>
@@ -11,6 +12,7 @@
   <Node name="Addition Node" type="1">
     <numberOfInputs min="0" max="10" default="2" />
     <numberOfOutputs min="1" max="1" default="1" />
+    <inputType multiInput="false" multiOutput="false" />
     <color>red</color>
     <parameters>
 		<parameter key="value" type="System.Single" value="0.5"/>		
@@ -20,6 +22,7 @@
   	<color>blue</color>
     <numberOfInputs min="0" max="20" default="1" />
     <numberOfOutputs min="0" max="20" default="1" />
+    <inputType multiInput="false" multiOutput="false" />
     <parameters>
 	</parameters>
   </Node>    

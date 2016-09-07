@@ -31,7 +31,7 @@ public static class DrawUtilities
 
         Handles.DrawBezier(startPos, endPos, startTan, endTan, Color.black, null, 2);
     }
-
+    
     public static void DrawNodeCurve(Rect start, Rect end, Color col)
     {
         Vector3 startPos = new Vector3(start.x + start.width , start.y + start.height * 0.5f, 0);
@@ -61,7 +61,7 @@ public static class DrawUtilities
 
     public static void DrawMouseCurve(Rect start, Vector3 mousePosition, float thickness)
     {
-        Vector3 startPos = new Vector3(start.x + start.width + 10f, start.y + start.height * 0.5f, 0);
+        Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height * 0.5f, 0);
         Vector3 endPos = mousePosition;
         Vector3 startTan = startPos + Vector3.right * 50;
         Vector3 endTan = endPos + Vector3.left * 50;

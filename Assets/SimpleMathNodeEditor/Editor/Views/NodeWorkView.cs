@@ -18,8 +18,8 @@ public class NodeWorkView : ViewBaseClass
     private float panX = 0;
     private float panY = 0;
 
-    private const float kZoomMin = 0.7f; // max zoom out
-    private const float kZoomMax = 1.0f; // max zoom in
+    private const float kZoomMin = 0.5f; // max zoom out
+    private const float kZoomMax = 1.25f; // max zoom in
     public static float _zoom = 1.0f;
     private readonly Rect _zoomArea = new Rect(0.0f, 0.0f, 10000f, 10000f);
 
@@ -72,7 +72,7 @@ public class NodeWorkView : ViewBaseClass
 
         GUILayout.EndArea();
 
-        currentTimelineView.UpdateView(new Rect(panX, -panY + (viewRect.height / _zoom) - 40f, 10000, 40f / _zoom),
+        currentTimelineView.UpdateView(new Rect(panX, -panY + (viewRect.height / _zoom) - (40f / _zoom), 10000, 40f / _zoom),
                 new Rect(0f, 1f, 1f, 1f), e, currentNodeGraph);
         currentTimelineView.ProcessEvents(e);
 

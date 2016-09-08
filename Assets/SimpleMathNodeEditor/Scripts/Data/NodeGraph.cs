@@ -15,7 +15,7 @@ public class NodeGraph : ScriptableObject
     public bool showProperties;
     public bool wantsConnection;
     public NodeBase connectionNode;
-    public List<NodeBase> connectionNodes;
+    public List<NodeOutput> connectionOutputList;
     public NodeOutput connectionOutput;
 
     public List<Rect> graphInputRects = new List<Rect>();
@@ -160,7 +160,7 @@ public class NodeGraph : ScriptableObject
         showProperties = false;
         wantsConnection = false;
         connectionNode = null;
-        connectionNodes = null;
+        connectionOutputList = null;
         connectionOutput = null;
         curveIndex = -1;
     }
@@ -182,7 +182,7 @@ public class NodeGraph : ScriptableObject
             }
         }
 
-        if (wantsConnection && (connectionNode != null || connectionNodes != null))
+        if (wantsConnection && (connectionNode != null || connectionOutputList != null))
         {
             DrawConnectionToMouse(e.mousePosition);
 
@@ -208,20 +208,20 @@ public class NodeGraph : ScriptableObject
 
     private void DrawConnectionToMouse(Vector2 mousePosition)
     {
-        NodeBase temp = null;
+        NodeOutput temp = null;
 
         if(connectionNode == null)
         {
-            temp = connectionNodes[0];
+            temp = connectionOutputList[0];
         }
-        else if(connectionNodes == null)
+        else if(connectionOutputList == null)
         {
-            temp = connectionNode;
+            temp = connectionOutput;
         }
 
         if(temp != null)
         {
-            if (this != temp.parentGraph)
+            if (this != temp.outputNode.parentGraph)
             {
                 //Draw Curve from Leftside Inputs to Mouse
                 if (graphInputRects.Count > curveIndex && curveIndex != -1)
@@ -231,26 +231,54 @@ public class NodeGraph : ScriptableObject
                 }
                 else
                 {
-                    if(connectionNode != null || connectionOutput != null)
+                    if(connectionNode != null || connectionOutput != null && connectionOutputList == null)
                     {
-                        //Draw out of the GroupNode to Mouse
-                        DrawUtilities.DrawMouseCurve(connectionOutput.outputNode.parentGraph.graphNode.nodeOutputs[connectionOutput.position].rect, mousePosition, 2f);
+                        if (connectionOutput.outputNode.parentGraph.graphNode.multiOutput)
+                        {
+                            DrawUtilities.DrawMouseCurve(connectionOutput.outputNode.parentGraph.graphNode.getMultiOutputRect(), mousePosition, connectionOutputList.Count + 2f);
+                        }
+                        else
+                        {
+                            //Draw out of the GroupNode to Mouse
+                            DrawUtilities.DrawMouseCurve(connectionOutput.outputNode.parentGraph.graphNode.nodeOutputs[connectionOutput.position].rect, mousePosition, 2f);
+                        }
                     }
-                    else if (connectionNodes != null)
+                    else if (connectionOutputList != null)
                     {
-                        DrawUtilities.DrawMouseCurve(connectionNodes[0].nodeRect, mousePosition, connectionNodes.Count + 2);
+                        if (connectionOutputList[0].outputNode.parentGraph.graphNode.multiOutput)
+                        {
+                            DrawUtilities.DrawMouseCurve(connectionOutputList[0].outputNode.parentGraph.graphNode.getMultiOutputRect(), mousePosition, connectionOutputList.Count + 2f);
+                        }
+                        else
+                        {
+                            DrawUtilities.DrawMouseCurve(connectionOutputList[0].outputNode.nodeRect, mousePosition, connectionOutputList.Count + 2);
+                        }
                     }
                 }
             }
             else
             {
-                if(connectionNode != null || connectionOutput != null)
+                if(connectionNode != null || connectionOutput != null && connectionOutputList == null)
                 {
-                    DrawUtilities.DrawMouseCurve(connectionOutput.rect, mousePosition, 2f);
+                    if (connectionOutput.outputNode.multiOutput)
+                    {
+                        DrawUtilities.DrawMouseCurve(connectionOutput.outputNode.getMultiOutputRect(), mousePosition, 2f);
+                    }
+                    else
+                    {
+                        DrawUtilities.DrawMouseCurve(connectionOutput.rect, mousePosition, 2f);
+                    }
                 }
-                else if (connectionNodes != null)
-                {               
-                    DrawUtilities.DrawMouseCurve(connectionNodes[0].nodeRect, mousePosition, connectionNodes.Count + 2);
+                else if (connectionOutputList != null)
+                {
+                    if (connectionOutputList[0].outputNode.multiOutput)
+                    {
+                        DrawUtilities.DrawMouseCurve(connectionOutputList[0].outputNode.getMultiOutputRect(), mousePosition, 2f);
+                    }
+                    else
+                    {
+                        DrawUtilities.DrawMouseCurve(connectionOutputList[0].outputNode.nodeRect, mousePosition, connectionOutputList.Count + 2);
+                    }
                 }
             }
         }

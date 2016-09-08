@@ -76,14 +76,25 @@ public class TimePointer
                     arrowRect = rect;
                 }
             }
+        }
 
+        if (parentNode.isSelected)
+        {
             if (e.keyCode == KeyCode.LeftArrow && e.type == EventType.KeyUp)
             {
-                arrowRect.x -= NodeBase.snapSize;
+                arrowRect.x -= 10f;
             }
             if (e.keyCode == KeyCode.RightArrow && e.type == EventType.KeyUp)
             {
-                arrowRect.x += NodeBase.snapSize;
+                arrowRect.x += 10f;
+            }
+            if (e.keyCode == KeyCode.DownArrow && e.type == EventType.KeyUp)
+            {
+                arrowRect.x -= 1f;
+            }
+            if (e.keyCode == KeyCode.UpArrow && e.type == EventType.KeyUp)
+            {
+                arrowRect.x += 1f;
             }
         }
 

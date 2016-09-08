@@ -26,13 +26,14 @@ public class NodeBase : ScriptableObject
     public TimePointer timePointer;
     public DragButton dragButton;
 
-    private bool multiInput = false;
-    private bool multiOutput = false;
+    public bool multiInput = false;
+    public bool multiOutput = false;
     public int numberOfInputs;
     public int numberOfOutputs;
     public static float snapSize = 10;
 
     public NodeGraph nodeGraph;
+    public AnimationCurve curve = AnimationCurve.Linear(0,0,1,1);
 
     public GUISkin nodeSkin { get; set; }
     #endregion
@@ -226,6 +227,8 @@ public class NodeBase : ScriptableObject
             GUILayout.EndVertical();
         }
 
+        EditorGUI.CurveField(new Rect(10, 250, viewRect.width - 20, 250), curve, Color.green, new Rect(0,0,1,1));
+
         if (!multiInput)
             resizeInputHandles(numberOfInputs);        
 
@@ -376,7 +379,6 @@ public class NodeBase : ScriptableObject
             if (parentGraph.graphNode != null)
             {
                 int i = parentGraph.graphNode.nodeInputs.FindIndex(a => a.inputNode == currentInput.inputNode);
-                //Debug.Log(i + ": " + currentInput.inputNode.parentGraph.graphName + "  -  " + parentGraph.graphName);
 
                 if (i >= 0)
                 {
@@ -426,33 +428,74 @@ public class NodeBase : ScriptableObject
                 {
                     if (parentGraph.wantsConnection)
                     {
-                        for (int k = 0; k < nodeInputs.Count; k++)
+                        if (parentGraph.connectionOutputList != null)
                         {
-                            if(nodeInputs[k].inputNode == null && nodeInputs[k].isOccupied == false)
+                            for (int i = 0; i < parentGraph.connectionOutputList.Count; i++)
                             {
-                                nodeInputs[k].inputNode = parentGraph.connectionNode;
-                                nodeInputs[k].isOccupied = nodeInputs[k].inputNode != null;
+                                bool needsExpanding = true;
+                                for (int k = 0; k < nodeInputs.Count; k++)
+                                {
+                                    if (nodeInputs[k].inputNode == null && nodeInputs[k].isOccupied == false)
+                                    {
+                                        nodeInputs[k].inputNode = parentGraph.connectionOutputList[i].outputNode;
+                                        nodeInputs[k].isOccupied = nodeInputs[k].inputNode != null;
 
-                                parentGraph.wantsConnection = false;
-                                parentGraph.connectionNode = null;
-                                Debug.Log("Connected at: " + k);
+                                        Debug.Log("Connected at: " + k);
+                                        needsExpanding = false;
 
-                                return;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        needsExpanding = true;
+                                    }
+                                }
+
+                                if (numberOfInputs < nodeInputsMax && needsExpanding)
+                                {
+                                    int t = nodeInputs.Count;
+                                    numberOfInputs = t + 1;
+                                    nodeInputs.Add(new NodeInput());
+                                    nodeInputs[t].inputNode = parentGraph.connectionOutputList[i].outputNode;
+                                    nodeInputs[t].isOccupied = nodeInputs[t].inputNode != null;
+                                    Debug.Log("Increased Input and Connected");
+                                }
                             }
-                        }
 
-                        if (numberOfInputs < nodeInputsMax)
+                            parentGraph.wantsConnection = false;
+                            parentGraph.connectionNode = null;
+                            parentGraph.connectionOutputList = null;
+                        }
+                        else
                         {
-                            int i = nodeInputs.Count;
-                            numberOfInputs = i + 1;
-                            nodeInputs.Add(new NodeInput());
-                            nodeInputs[i].inputNode = parentGraph.connectionNode;
-                            nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
-                            Debug.Log("Increased Input and Connected");
-                        }
+                            for (int k = 0; k < nodeInputs.Count; k++)
+                            {
+                                if(nodeInputs[k].inputNode == null && nodeInputs[k].isOccupied == false)
+                                {
+                                    nodeInputs[k].inputNode = parentGraph.connectionNode;
+                                    nodeInputs[k].isOccupied = nodeInputs[k].inputNode != null;
 
-                        parentGraph.wantsConnection = false;
-                        parentGraph.connectionNode = null;
+                                    parentGraph.wantsConnection = false;
+                                    parentGraph.connectionNode = null;
+                                    Debug.Log("Connected at: " + k);
+
+                                    return;
+                                }
+                            }
+
+                            if (numberOfInputs < nodeInputsMax)
+                            {
+                                int i = nodeInputs.Count;
+                                numberOfInputs = i + 1;
+                                nodeInputs.Add(new NodeInput());
+                                nodeInputs[i].inputNode = parentGraph.connectionNode;
+                                nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
+                                Debug.Log("Increased Input and Connected");
+                            }
+
+                            parentGraph.wantsConnection = false;
+                            parentGraph.connectionNode = null;
+                        }
                     }
                     else // remove all Inputs
                     {
@@ -478,17 +521,35 @@ public class NodeBase : ScriptableObject
                     if (parentGraph != null)
                     {
                         if (parentGraph.wantsConnection)
-                        {                          
-                            nodeInputs[i].inputNode = parentGraph.connectionOutput.outputNode;
-                            nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
-                            nodeInputs[i].outputPos = parentGraph.connectionOutput.position;
+                        {                
+                            if(parentGraph.connectionOutputList != null)
+                            {
+                                nodeInputs[i].inputNode = parentGraph.connectionOutputList[0].outputNode;
+                                nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
+                                nodeInputs[i].outputPos = parentGraph.connectionOutputList[0].position;
 
-                            nodeInputs[i].inputNode.nodeOutputs[nodeInputs[i].outputPos].connectedToNode = this;
-                            parentGraph.connectionOutput.connectedToNode = this;
+                                nodeInputs[i].inputNode.nodeOutputs[nodeInputs[i].outputPos].connectedToNode = this;
+                                parentGraph.connectionOutputList[0].connectedToNode = this;
 
-                            parentGraph.wantsConnection = false;
-                            parentGraph.connectionNode = null;
-                            Debug.Log("Connected");
+                                parentGraph.wantsConnection = false;
+                                parentGraph.connectionNode = null;
+                                parentGraph.connectionOutputList = null;
+
+                                Debug.Log("Connected from multiInput");
+                            }
+                            else
+                            {
+                                nodeInputs[i].inputNode = parentGraph.connectionOutput.outputNode;
+                                nodeInputs[i].isOccupied = nodeInputs[i].inputNode != null;
+                                nodeInputs[i].outputPos = parentGraph.connectionOutput.position;
+
+                                nodeInputs[i].inputNode.nodeOutputs[nodeInputs[i].outputPos].connectedToNode = this;
+                                parentGraph.connectionOutput.connectedToNode = this;
+
+                                parentGraph.wantsConnection = false;
+                                parentGraph.connectionNode = null;
+                                Debug.Log("Connected");
+                            }       
                         }
                         else
                         {
@@ -512,12 +573,11 @@ public class NodeBase : ScriptableObject
                 if (parentGraph != null)
                 {
                     parentGraph.wantsConnection = true;
-                    parentGraph.connectionNodes = new List<NodeBase>();
+                    parentGraph.connectionOutputList = new List<NodeOutput>();
                     foreach(NodeOutput n in nodeOutputs)
                     {
-                        parentGraph.connectionNodes.Add(n.outputNode);
+                        parentGraph.connectionOutputList.Add(n);
                     }
-                    Debug.Log(parentGraph.connectionNodes.Count);
                 }
             }
 
@@ -540,7 +600,6 @@ public class NodeBase : ScriptableObject
                         {
                             if (nodeOutputs[i].outputNode != null)
                             {
-                                Debug.Log("herro");
                                 parentGraph.wantsConnection = true;
                                 parentGraph.connectionNode = nodeOutputs[i].outputNode;                                
                                 parentGraph.connectionOutput = nodeOutputs[i];

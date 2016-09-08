@@ -10,6 +10,8 @@ public class NodeTimelineView : ViewBaseClass
 {
     public float xOffset;
     public static float timelineRectOpacity = 0.2f;
+    private float smallTickSpacing = 10f;
+    private float bigTickSpacing = 50f;
 
     public NodeTimelineView() : base("") { }
     
@@ -21,8 +23,10 @@ public class NodeTimelineView : ViewBaseClass
         GUILayout.BeginArea(viewRect);
         GUILayout.BeginVertical();
 
-        DrawTicks(viewRect, 10, 0.6f, Color.grey, false);
-        DrawTicks(viewRect, 50, 0.4f, Color.black, true);
+        setTickSpacing();
+
+        DrawTicks(viewRect, smallTickSpacing, 0.6f, Color.grey, false);
+        DrawTicks(viewRect, bigTickSpacing, 0.4f, Color.black, true);
 
         if (currentNodeGraph != null)
         {
@@ -46,26 +50,7 @@ public class NodeTimelineView : ViewBaseClass
         base.ProcessEvents(e);
     }
 
-    public void scrollViewRect(float x)
-    {
-        xOffset = -x;
-    }
-
-    private void drawTimelineConnetion(Vector2 pos)
-    {
-        Handles.color = Color.red;
-
-        Handles.DrawLine(new Vector3(pos.x, 0f , 0f),
-            new Vector3(pos.x, viewRect.height, 0f));
-    }
-
-    private void DrawTimelineAnimationLength(Vector2 start,Vector2 end, Color col, float opacity)
-    {      
-        Color newCol = new Color(col.r, col.g, col.b, opacity);
-        EditorGUI.DrawRect(new Rect(new Vector2(start.x, 0f), new Vector2(end.x - start.x, viewRect.height)), newCol);
-    }
-
-    public void DrawTicks(Rect viewRect, float gridSpacing, float heightOfTicks, Color gridColor,bool drawLabel)
+    public void DrawTicks(Rect viewRect, float gridSpacing, float heightOfTicks, Color gridColor, bool drawLabel)
     {
         int widthDivs = Mathf.CeilToInt(viewRect.width / gridSpacing);
 
@@ -87,4 +72,41 @@ public class NodeTimelineView : ViewBaseClass
         
         Handles.EndGUI();
     }    
+
+    private void setTickSpacing()
+    {
+        if(NodeWorkView._zoom > 0.5f && NodeWorkView._zoom < 0.75f)
+        {
+            smallTickSpacing = 50f;
+            bigTickSpacing = 250f;
+        }else if (NodeWorkView._zoom > 0.75f && NodeWorkView._zoom < 1f)
+        {
+            smallTickSpacing = 25f;
+            bigTickSpacing = 125f;
+        }
+        else if (NodeWorkView._zoom > 1f && NodeWorkView._zoom < 1.25f)
+        {
+            smallTickSpacing = 10f;
+            bigTickSpacing = 50f;
+        }
+    }
+
+    public void scrollViewRect(float x)
+    {
+        xOffset = -x;
+    }
+
+    private void drawTimelineConnetion(Vector2 pos)
+    {
+        Handles.color = Color.red;
+
+        Handles.DrawLine(new Vector3(pos.x, 0f , 0f),
+            new Vector3(pos.x, viewRect.height, 0f));
+    }
+
+    private void DrawTimelineAnimationLength(Vector2 start,Vector2 end, Color col, float opacity)
+    {      
+        Color newCol = new Color(col.r, col.g, col.b, opacity);
+        EditorGUI.DrawRect(new Rect(new Vector2(start.x, 0f), new Vector2(end.x - start.x, viewRect.height)), newCol);
+    }
 }

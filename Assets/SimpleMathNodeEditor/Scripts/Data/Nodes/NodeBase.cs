@@ -118,7 +118,7 @@ public class NodeBase : ScriptableObject
         {
             if (dragButton.middleButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.resizeStartOffset)
             {
-                if (e.button == 0 && e.type == EventType.MouseDrag)
+                if (e.button == 0 && e.type == EventType.MouseDown)
                 {
                     if (e.shift)
                         isSelected = true;
@@ -130,7 +130,7 @@ public class NodeBase : ScriptableObject
 
             if (dragButton.leftButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.isMoveable)
             {
-                if (e.button == 0 && e.type == EventType.MouseDrag)
+                if (e.button == 0 && e.type == EventType.MouseDown)
                 {
                     timePointer.resizeStartOffset = true;
                     timePointer.isSelected = true;
@@ -138,7 +138,7 @@ public class NodeBase : ScriptableObject
             }
             if (dragButton.rightButtonRect.Contains(e.mousePosition) && !timePointer.resizeStartOffset && !timePointer.isMoveable)
             {
-                if (e.button == 0 && e.type == EventType.MouseDrag)
+                if (e.button == 0 && e.type == EventType.MouseDown)
                 {
                     timePointer.resizeEndOffset = true;
                     timePointer.isSelected = true;
@@ -170,7 +170,6 @@ public class NodeBase : ScriptableObject
         viewPortRect = viewRect;
 
         string currentStyle = isSelected ? "node_selected" : "node_default";
-        string lowerBarStyle = currentStyle;
         if (timePointer.isSelected)
             currentStyle = "node_selected";
         GUI.Box(nodeRect, nodeName, guiSkin.GetStyle(currentStyle));

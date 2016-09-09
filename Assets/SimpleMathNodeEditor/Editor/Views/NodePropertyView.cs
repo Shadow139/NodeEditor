@@ -40,7 +40,7 @@ public class NodePropertyView : ViewBaseClass
         GUILayout.Space(40f);
         GUILayout.BeginHorizontal();
         GUILayout.Label("Zoom: ");
-        NodeWorkView._zoom = EditorGUILayout.Slider(NodeWorkView._zoom, 0.5f, 1.25f);
+        NodeWorkView._zoom = EditorGUILayout.Slider(NodeWorkView._zoom, 0.6f, 1.25f);
         GUILayout.EndHorizontal();
 
         GUILayout.EndVertical();

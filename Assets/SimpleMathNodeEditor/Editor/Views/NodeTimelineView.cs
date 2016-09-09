@@ -77,17 +77,21 @@ public class NodeTimelineView : ViewBaseClass
     {
         if(NodeWorkView._zoom > 0.5f && NodeWorkView._zoom < 0.75f)
         {
-            smallTickSpacing = 50f;
-            bigTickSpacing = 250f;
-        }else if (NodeWorkView._zoom > 0.75f && NodeWorkView._zoom < 1f)
+            smallTickSpacing = 10f;
+            bigTickSpacing = 50f;
+            NodeBase.snapSize = 25f;
+        }
+        else if (NodeWorkView._zoom > 0.75f && NodeWorkView._zoom < 1f)
         {
-            smallTickSpacing = 25f;
-            bigTickSpacing = 125f;
+            smallTickSpacing = 10f;
+            bigTickSpacing = 50f;
+            NodeBase.snapSize = 10f;
         }
         else if (NodeWorkView._zoom > 1f && NodeWorkView._zoom < 1.25f)
         {
             smallTickSpacing = 10f;
             bigTickSpacing = 50f;
+            NodeBase.snapSize = 1f;
         }
     }
 

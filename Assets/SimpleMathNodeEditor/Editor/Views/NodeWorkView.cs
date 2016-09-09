@@ -18,7 +18,7 @@ public class NodeWorkView : ViewBaseClass
     private float panX = 0;
     private float panY = 0;
 
-    private const float kZoomMin = 0.5f; // max zoom out
+    private const float kZoomMin = 0.6f; // max zoom out
     private const float kZoomMax = 1.25f; // max zoom in
     public static float _zoom = 1.0f;
     private readonly Rect _zoomArea = new Rect(0.0f, 0.0f, 10000f, 10000f);

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System.Linq;
 using System;
 using System.Collections.Generic;
 
@@ -372,6 +373,38 @@ public class NodeGraph : ScriptableObject
             GUI.Label(new Rect(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f), 32f, 120f), graphNode.nodeOutputs.Count + "", guiSkin.GetStyle("std_whiteText"));
 
         }
+    }
+
+    public NodeBase getFirstAnimatedNode()
+    {
+        NodeBase tmp = null;
+        float min = float.MaxValue;
+        foreach(NodeBase n in nodes)
+        {
+            if ((n.timePointer.x + n.timePointer.startAnimOffset) < min)
+            {
+                min = n.timePointer.x + n.timePointer.startAnimOffset;
+                tmp = n;
+            }
+        }
+
+        return tmp;
+    }
+
+    public NodeBase getLastAnimatedNode()
+    {
+        NodeBase tmp = null;
+        float max = 0f;
+        foreach (NodeBase n in nodes)
+        {
+            if ((n.timePointer.x + n.timePointer.endAnimOffset) > max)
+            {
+                max = n.timePointer.x + n.timePointer.endAnimOffset;
+                tmp = n;
+            }
+        }
+
+        return tmp;
     }
 
     public void printGraph(NodeBase node)

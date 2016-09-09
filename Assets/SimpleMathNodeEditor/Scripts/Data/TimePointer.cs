@@ -6,6 +6,8 @@ using System;
 public class TimePointer
 {
     public Rect arrowRect;
+    public Vector2 centerPoint;
+    public float x;
     public float startAnimOffset, endAnimOffset;
     public TimeSpan startTime, endTime;
 
@@ -14,21 +16,34 @@ public class TimePointer
     public bool isMoveable, resizeStartOffset, resizeEndOffset;
 
     private float opacity = 0.2f;
+    private float curveHeight = 150f;
 
     public void InitTimePointer()
     {
         arrowRect = new Rect(10f, 10f, 36f, 48f);
+        centerPoint = new Vector2(0f, 0f);
+
         startAnimOffset = -100f;
         endAnimOffset = 100f;
+        if(parentNode.nodeType == NodeType.Graph)
+        {
+            startAnimOffset = 0;
+            endAnimOffset = 0;
+        }
     }
 
     public void drawArrow(Event e,Rect viewRect, Rect workViewRect, GUISkin guiSkin)
     {
         ProcessEvents(e, viewRect, workViewRect);
 
-        float y = viewRect.height / parentNode.parentGraph.zoom;
-        arrowRect.y = (y - 40f - arrowRect.height) - parentNode.parentGraph.panY ;
-        
+        x = GetLowerRectCenter().x;
+        float y = viewRect.height / parentNode.parentGraph.zoom - (40f / parentNode.parentGraph.zoom);
+        arrowRect.y = (y - arrowRect.height) - parentNode.parentGraph.panY;
+
+        curveHeight = 150 - (75 * parentNode.parentGraph.zoom);
+
+        adjustGraphNode();
+
         if (isSelected || parentNode.isSelected || isHighlighted) { opacity = 1f; } else { opacity = 0.2f; }
 
         if (isSelected || parentNode.isSelected || isHighlighted)
@@ -48,13 +63,13 @@ public class TimePointer
         {
             DrawUtilities.DrawRangeCurveShadow(GetStartAnimPos(), GetEndAnimPos(),
                                  parentNode.getLowerCenter(),
-                                 new Vector3(arrowRect.x + arrowRect.width * 0.5f, arrowRect.y - 150f, 0f),
+                                 new Vector3(arrowRect.x + arrowRect.width * 0.5f, arrowRect.y - curveHeight, 0f),
                                  parentNode.getColorByNodeType(), opacity, 3);
         }
 
         DrawUtilities.DrawRangeCurve(GetStartAnimPos(), GetEndAnimPos(),
                              parentNode.getLowerCenter(),
-                             new Vector3(arrowRect.x + arrowRect.width * 0.5f, arrowRect.y - 150f, 0f),
+                             new Vector3(arrowRect.x + arrowRect.width * 0.5f, arrowRect.y - curveHeight, 0f),
                              parentNode.getColorByNodeType(), opacity, 3);
         Handles.EndGUI();
     }
@@ -67,13 +82,16 @@ public class TimePointer
             {
                 if (e.button == 0 && e.type == EventType.MouseDrag)
                 {
-                    Rect rect = arrowRect;
+                    float delta = snapPoint(e.delta.x, NodeBase.snapSize);
 
-                    rect.x += e.delta.x;
-
-                    rect.position = snap(rect.position, NodeBase.snapSize);
-
-                    arrowRect = rect;
+                    if (parentNode.nodeType == NodeType.Graph)
+                    {
+                        translateGraphNodeInsides(delta);
+                    }
+                    else
+                    {
+                        arrowRect.x += delta;
+                    }
                 }
             }
         }
@@ -104,8 +122,16 @@ public class TimePointer
             {
                 if (e.button == 0 && e.type == EventType.MouseDrag)
                 {
-                    startAnimOffset += e.delta.x;
-                    startAnimOffset = snapPoint(startAnimOffset, NodeBase.snapSize);
+                    if (parentNode.nodeType == NodeType.Graph)
+                    {
+                        NodeBase tmp = parentNode.nodeGraph.getFirstAnimatedNode();
+                        Debug.Log(tmp.nodeName + " - " + tmp.parameters["value"].floatParam);
+                    }
+                    else
+                    {
+                        startAnimOffset += e.delta.x;
+                        startAnimOffset = snapPoint(startAnimOffset, NodeBase.snapSize);
+                    }
 
                     if (startAnimOffset > 0)
                     {
@@ -122,8 +148,16 @@ public class TimePointer
             {
                 if (e.button == 0 && e.type == EventType.MouseDrag)
                 {
-                    endAnimOffset += e.delta.x;
-                    endAnimOffset = snapPoint(endAnimOffset, NodeBase.snapSize);
+                    if (parentNode.nodeType == NodeType.Graph)
+                    {
+                        NodeBase tmp = parentNode.nodeGraph.getLastAnimatedNode();
+                        Debug.Log(tmp.nodeName + " - " + tmp.parameters["value"].floatParam);
+                    }
+                    else
+                    {
+                        endAnimOffset += e.delta.x;
+                        endAnimOffset = snapPoint(endAnimOffset, NodeBase.snapSize);
+                    }
 
                     if (endAnimOffset < 0)
                     {
@@ -139,13 +173,53 @@ public class TimePointer
         return new Vector2(arrowRect.x + arrowRect.width * 0.5f, arrowRect.y + arrowRect.height);
     }
 
+    private void adjustGraphNode()
+    {
+        if (parentNode.nodeType == NodeType.Graph)
+        {
+            NodeBase first = parentNode.nodeGraph.getFirstAnimatedNode();
+            NodeBase last = parentNode.nodeGraph.getLastAnimatedNode();
+
+            if (first != null)
+                startAnimOffset = getDifferenceFromStart(first.timePointer.x) + first.timePointer.startAnimOffset;
+
+            if (last != null)
+                endAnimOffset = getDifferenceFromEnd(last.timePointer.x) + first.timePointer.endAnimOffset;
+        }
+    }
+
+    private void translateGraphNodeInsides(float delta)
+    {
+        foreach (NodeBase n in parentNode.nodeGraph.nodes)
+        {
+            Debug.Log("moving  " + n.nodeName);
+            if(n.nodeType == NodeType.Graph)
+            {
+                n.timePointer.translateGraphNodeInsides(delta);
+            }
+            else
+            {
+                n.timePointer.arrowRect.x += delta;
+            }
+
+            NodeBase first = parentNode.nodeGraph.getFirstAnimatedNode();
+            NodeBase last = parentNode.nodeGraph.getLastAnimatedNode();
+
+            if (first != null)
+                startAnimOffset = getDifferenceFromStart(first.timePointer.x) + first.timePointer.startAnimOffset;
+
+            if (last != null)
+                endAnimOffset = getDifferenceFromEnd(last.timePointer.x) + first.timePointer.endAnimOffset;
+        }
+    }
+
     public Vector2 GetStartAnimPos()
     {
         Vector2 start = GetLowerRectCenter();
         start.x = start.x + startAnimOffset;
         return start;
     }
-    
+        
     public Vector2 GetEndAnimPos()
     {
         Vector2 end = GetLowerRectCenter();
@@ -165,5 +239,15 @@ public class TimePointer
             snapValue * Mathf.Round(v.x / snapValue),
             snapValue * Mathf.Round(v.y / snapValue)
         );
+    }
+
+    private float getDifferenceFromStart(float start)
+    {
+        return start - GetLowerRectCenter().x;
+    }
+
+    private float getDifferenceFromEnd(float end)
+    {
+        return end - GetLowerRectCenter().x;
     }
 }

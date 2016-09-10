@@ -387,7 +387,6 @@ public class NodeGraph : ScriptableObject
                 tmp = n;
             }
         }
-
         return tmp;
     }
 
@@ -403,7 +402,6 @@ public class NodeGraph : ScriptableObject
                 tmp = n;
             }
         }
-
         return tmp;
     }
 

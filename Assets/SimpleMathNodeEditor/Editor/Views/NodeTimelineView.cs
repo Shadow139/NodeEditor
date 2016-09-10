@@ -9,7 +9,6 @@ using System;
 public class NodeTimelineView : ViewBaseClass
 {
     public float xOffset;
-    public static float timelineRectOpacity = 0.2f;
     private float smallTickSpacing = 10f;
     private float bigTickSpacing = 50f;
 
@@ -25,9 +24,6 @@ public class NodeTimelineView : ViewBaseClass
 
         setTickSpacing();
 
-        DrawTicks(viewRect, smallTickSpacing, 0.6f, Color.grey, false);
-        DrawTicks(viewRect, bigTickSpacing, 0.4f, Color.black, true);
-
         if (currentNodeGraph != null)
         {
             foreach (NodeBase node in currentNodeGraph.nodes)
@@ -35,11 +31,17 @@ public class NodeTimelineView : ViewBaseClass
                 if (node.isSelected || node.timePointer.isSelected || node.timePointer.isHighlighted || WorkPreferences.showTimeInfo)
                 {
                     drawTimelineConnetion(node.timePointer.arrowRect.center);
-                    Color col = node.getColorByNodeType();
-                    DrawTimelineAnimationLength(node.timePointer.GetStartAnimPos(), node.timePointer.GetEndAnimPos(), col, timelineRectOpacity);
+                    Color col = node.getColorByNodeType();                                         
+                    DrawTimelineAnimationLength(node, col, WorkPreferences.timelineRectOpacity);
+
+                    if(WorkPreferences.showSubGraph)
+                        DrawSubGraphNodes(node);
                 }
             }
         }
+        
+        DrawTicks(viewRect, smallTickSpacing, 0.55f, Color.grey, false);
+        DrawTicks(viewRect, bigTickSpacing, 0.35f, Color.black, true);
 
         GUILayout.EndVertical();
         GUILayout.EndArea();
@@ -110,7 +112,40 @@ public class NodeTimelineView : ViewBaseClass
 
     private void DrawTimelineAnimationLength(Vector2 start,Vector2 end, Color col, float opacity)
     {      
-        Color newCol = new Color(col.r, col.g, col.b, opacity);
+        Color newCol = new Color(col.r, col.g, col.b, opacity);        
         EditorGUI.DrawRect(new Rect(new Vector2(start.x, 0f), new Vector2(end.x - start.x, viewRect.height)), newCol);
+    }
+
+    private void DrawTimelineAnimationLength(NodeBase node, Color col, float opacity)
+    {
+        Color newCol = new Color(col.r, col.g, col.b, opacity);        
+        Vector2 startVec = node.timePointer.GetStartAnimPos();
+        Vector2 endVec = node.timePointer.GetEndAnimPos();
+        EditorGUI.DrawRect(new Rect(new Vector2(startVec.x, 0f), new Vector2(endVec.x - startVec.x, viewRect.height)), newCol);
+    }
+
+    private void DrawSubGraphNodes(NodeBase n)
+    {
+        if (n.nodeType == NodeType.Graph)
+        {
+            float space = 20f / n.parentGraph.zoom;
+            for(int i = 0; i < n.nodeGraph.nodes.Count; i++)
+            {
+                Vector2 start = n.nodeGraph.nodes[i].timePointer.GetStartAnimPos();
+                start.y = (i * 2.5f) / n.parentGraph.zoom + space;
+                Vector2 end = n.nodeGraph.nodes[i].timePointer.GetEndAnimPos();
+                end.y = (i * 2.5f) / n.parentGraph.zoom + space;
+
+                Handles.color = n.nodeGraph.nodes[i].getColorByNodeType();
+
+                Handles.DrawLine(start,end);
+                start.y += 0.5f;
+                end.y += 0.5f;
+                Handles.DrawLine(start, end);
+                start.y += 0.5f;
+                end.y += 0.5f;
+                Handles.DrawLine(start, end);
+            }
+        }
     }
 }

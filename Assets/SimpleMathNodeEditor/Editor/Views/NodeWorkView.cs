@@ -72,7 +72,7 @@ public class NodeWorkView : ViewBaseClass
 
         GUILayout.EndArea();
 
-        currentTimelineView.UpdateView(new Rect(panX, -panY + (viewRect.height / _zoom) - (40f / _zoom), 10000, 40f / _zoom),
+        currentTimelineView.UpdateView(new Rect(panX, -panY + (viewRect.height / _zoom) - (50f / _zoom), 10000, 50f / _zoom),
                 new Rect(0f, 1f, 1f, 1f), e, currentNodeGraph);
         currentTimelineView.ProcessEvents(e);
 

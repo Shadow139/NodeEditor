@@ -70,7 +70,7 @@ public static class DrawUtilities
         for (int i = 0; i < 3; i++) // Draw a shadow
             Handles.DrawBezier(startPos, endPos, startTan, endTan, shadowCol, null, (i + 1) * 5);
 
-        Handles.DrawBezier(startPos, endPos, startTan, endTan, Color.black, null, thickness);
+        Handles.DrawBezier(startPos, endPos, startTan, endTan, WorkPreferences.nodeCurveColor, null, WorkPreferences.nodeCurveThickness);
     }
     
     public static void DrawNodeCurve(Rect start, Rect end, Color col, float thickness)

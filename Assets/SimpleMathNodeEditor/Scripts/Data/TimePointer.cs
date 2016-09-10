@@ -25,6 +25,7 @@ public class TimePointer
 
         startAnimOffset = -100f;
         endAnimOffset = 100f;
+
         if(parentNode.nodeType == NodeType.Graph)
         {
             startAnimOffset = 0;
@@ -37,14 +38,12 @@ public class TimePointer
         ProcessEvents(e, viewRect, workViewRect);
 
         x = GetLowerRectCenter().x;
-        float y = viewRect.height / parentNode.parentGraph.zoom - (40f / parentNode.parentGraph.zoom);
+        float y = viewRect.height / parentNode.parentGraph.zoom - (50f / parentNode.parentGraph.zoom);
         arrowRect.y = (y - arrowRect.height) - parentNode.parentGraph.panY;
 
         curveHeight = 150 - (75 * parentNode.parentGraph.zoom);
-
-        adjustGraphNode();
-
-        if (isSelected || parentNode.isSelected || isHighlighted) { opacity = 1f; } else { opacity = 0.2f; }
+        
+        if (isSelected || parentNode.isSelected || isHighlighted) { opacity = WorkPreferences.timelineCurveOpacityMax; } else { opacity = WorkPreferences.timelineCurveOpacityMin; }
 
         if (isSelected || parentNode.isSelected || isHighlighted)
         {
@@ -53,6 +52,8 @@ public class TimePointer
         {
             DrawConnectionToNode(false);
         }
+
+        adjustGraphNode();
     }
 
     private void DrawConnectionToNode(bool highlighted)
@@ -87,6 +88,7 @@ public class TimePointer
                     if (parentNode.nodeType == NodeType.Graph)
                     {
                         translateGraphNodeInsides(delta);
+                        //arrowRect.x += delta;
                     }
                     else
                     {
@@ -177,14 +179,32 @@ public class TimePointer
     {
         if (parentNode.nodeType == NodeType.Graph)
         {
-            NodeBase first = parentNode.nodeGraph.getFirstAnimatedNode();
-            NodeBase last = parentNode.nodeGraph.getLastAnimatedNode();
+            float min = float.MaxValue;
+            float max = 0f;
+            NodeBase minNode = null;
+            NodeBase maxNode = null;
 
-            if (first != null)
-                startAnimOffset = getDifferenceFromStart(first.timePointer.x) + first.timePointer.startAnimOffset;
+            foreach (NodeBase n in parentNode.nodeGraph.nodes)
+            {
+                if ((n.timePointer.x + n.timePointer.startAnimOffset) < min)
+                {
+                    min = n.timePointer.x + n.timePointer.startAnimOffset;
+                    minNode = n;
+                }
+                if ((n.timePointer.x + n.timePointer.endAnimOffset) > max)
+                {
+                    max = n.timePointer.x + n.timePointer.endAnimOffset;
+                    maxNode = n;
+                }
+            }
 
-            if (last != null)
-                endAnimOffset = getDifferenceFromEnd(last.timePointer.x) + first.timePointer.endAnimOffset;
+            Vector2 startVec = minNode.timePointer.GetStartAnimPos();
+            Vector2 endVec = maxNode.timePointer.GetEndAnimPos();
+            float midPoint = (startVec.x + endVec.x) / 2f;
+
+            arrowRect.x = midPoint - arrowRect.width * 0.5f;
+            startAnimOffset = startVec.x - midPoint;
+            endAnimOffset = endVec.x - midPoint;
         }
     }
 
@@ -192,7 +212,6 @@ public class TimePointer
     {
         foreach (NodeBase n in parentNode.nodeGraph.nodes)
         {
-            Debug.Log("moving  " + n.nodeName);
             if(n.nodeType == NodeType.Graph)
             {
                 n.timePointer.translateGraphNodeInsides(delta);
@@ -201,15 +220,6 @@ public class TimePointer
             {
                 n.timePointer.arrowRect.x += delta;
             }
-
-            NodeBase first = parentNode.nodeGraph.getFirstAnimatedNode();
-            NodeBase last = parentNode.nodeGraph.getLastAnimatedNode();
-
-            if (first != null)
-                startAnimOffset = getDifferenceFromStart(first.timePointer.x) + first.timePointer.startAnimOffset;
-
-            if (last != null)
-                endAnimOffset = getDifferenceFromEnd(last.timePointer.x) + first.timePointer.endAnimOffset;
         }
     }
 

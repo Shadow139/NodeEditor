@@ -6,6 +6,8 @@ using UnityEditor.AnimatedValues;
 public class NodePreferenceView : ViewBaseClass
 {
     bool showGridControls = false;
+    bool showNodeControls = false;
+    bool showTimelineControls = false;
 
     public NodePreferenceView() : base("Preferences") { }
     public override void UpdateView(Rect editorRect, Rect percentageRect, Event e, NodeGraph nodeGraph)
@@ -23,7 +25,8 @@ public class NodePreferenceView : ViewBaseClass
         showGridControls = EditorGUILayout.Foldout(showGridControls, "Show Grid Controls");
         if (showGridControls)
         {
-            //Draw Properties when nothing is selected            
+            GUILayout.Space(10f);
+
             EditorPreferences.gridColorOuter = EditorGUILayout.ColorField("Grid Outer Color", EditorPreferences.gridColorOuter);
             GUILayout.Space(6f);
             EditorPreferences.gridColorInner = EditorGUILayout.ColorField("Grid Inner Color", EditorPreferences.gridColorInner);
@@ -31,9 +34,58 @@ public class NodePreferenceView : ViewBaseClass
             EditorPreferences.gridSpacingDark = EditorGUILayout.FloatField("Grid Spacing Outer", EditorPreferences.gridSpacingDark);
             GUILayout.Space(6f);
             EditorPreferences.gridSpacingLight = EditorGUILayout.FloatField("Grid Spacing Inner", EditorPreferences.gridSpacingLight);
-            GUILayout.Space(6f);
         }
-        
+
+        GUILayout.Space(10f);
+
+        showNodeControls = EditorGUILayout.Foldout(showNodeControls, "Show Node Controls");
+        if (showNodeControls)
+        {
+            GUILayout.Space(10f);
+
+            WorkPreferences.nodeCurveColor = EditorGUILayout.ColorField("Node Curve Color", WorkPreferences.nodeCurveColor);
+            GUILayout.Space(6f);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Node Curve Thickness: ");
+            WorkPreferences.nodeCurveThickness = EditorGUILayout.Slider(WorkPreferences.nodeCurveThickness, 0.5f, 10f);
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(6f);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Default Curve Opacity: ");
+            WorkPreferences.timelineCurveOpacityMin = EditorGUILayout.Slider(WorkPreferences.timelineCurveOpacityMin, 0.0f, 1f);
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(6f);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Highlighted Curve Opacity: ");
+            WorkPreferences.timelineCurveOpacityMax = EditorGUILayout.Slider(WorkPreferences.timelineCurveOpacityMax, 0.0f, 1f);
+            GUILayout.EndHorizontal();
+
+        }
+        GUILayout.Space(10f);
+
+        showTimelineControls = EditorGUILayout.Foldout(showTimelineControls, "Show Timeline Controls");
+        if (showTimelineControls)
+        {
+            GUILayout.Space(10f);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Timeline Opacity: ");
+            WorkPreferences.timelineRectOpacity = EditorGUILayout.Slider(WorkPreferences.timelineRectOpacity, 0.0f, 1f);
+            GUILayout.EndHorizontal();
+            GUILayout.Space(6f);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Show Group Node sub Nodes ");
+            WorkPreferences.showSubGraph = EditorGUILayout.Toggle("", WorkPreferences.showSubGraph, GUILayout.Width(500));
+            GUILayout.EndHorizontal();
+
+        }
+        GUILayout.Space(10f);
+
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 

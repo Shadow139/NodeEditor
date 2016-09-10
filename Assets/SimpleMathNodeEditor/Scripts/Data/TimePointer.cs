@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 [Serializable]
 public class TimePointer
@@ -88,7 +90,6 @@ public class TimePointer
                     if (parentNode.nodeType == NodeType.Graph)
                     {
                         translateGraphNodeInsides(delta);
-                        //arrowRect.x += delta;
                     }
                     else
                     {
@@ -124,15 +125,15 @@ public class TimePointer
             {
                 if (e.button == 0 && e.type == EventType.MouseDrag)
                 {
+                    float delta = snapPoint(e.delta.x, NodeBase.snapSize);
+
                     if (parentNode.nodeType == NodeType.Graph)
                     {
-                        NodeBase tmp = parentNode.nodeGraph.getFirstAnimatedNode();
-                        Debug.Log(tmp.nodeName + " - " + tmp.parameters["value"].floatParam);
+                        scaleGraphNodeLeft(delta);
                     }
                     else
                     {
-                        startAnimOffset += e.delta.x;
-                        startAnimOffset = snapPoint(startAnimOffset, NodeBase.snapSize);
+                        startAnimOffset += delta;
                     }
 
                     if (startAnimOffset > 0)
@@ -150,15 +151,15 @@ public class TimePointer
             {
                 if (e.button == 0 && e.type == EventType.MouseDrag)
                 {
+                    float delta = snapPoint(e.delta.x, NodeBase.snapSize);
+
                     if (parentNode.nodeType == NodeType.Graph)
                     {
-                        NodeBase tmp = parentNode.nodeGraph.getLastAnimatedNode();
-                        Debug.Log(tmp.nodeName + " - " + tmp.parameters["value"].floatParam);
+                        scaleGraphNodeRight(delta);
                     }
                     else
                     {
-                        endAnimOffset += e.delta.x;
-                        endAnimOffset = snapPoint(endAnimOffset, NodeBase.snapSize);
+                        endAnimOffset += delta;
                     }
 
                     if (endAnimOffset < 0)
@@ -223,6 +224,32 @@ public class TimePointer
         }
     }
 
+    private void scaleGraphNodeLeft(float delta)
+    {
+        NodeBase tmp = parentNode.nodeGraph.getLastAnimatedNode();
+
+        List<NodeBase> SortedList = parentNode.nodeGraph.nodes.OrderByDescending(o => o.timePointer.x).ToList();
+        
+        for (int i = 0; i < SortedList.Count; i++)
+        {
+            float step = (delta / parentNode.nodeGraph.nodes.Count);
+            SortedList[i].timePointer.arrowRect.x += i * (step);
+        }
+    }
+
+    private void scaleGraphNodeRight(float delta)
+    {
+        NodeBase tmp = parentNode.nodeGraph.getFirstAnimatedNode();
+
+        List<NodeBase> SortedList = parentNode.nodeGraph.nodes.OrderBy(o => o.timePointer.x).ToList();
+
+        for (int i = 0; i < SortedList.Count; i++)
+        {
+            float step = (delta / parentNode.nodeGraph.nodes.Count);
+            SortedList[i].timePointer.arrowRect.x += i * (step);
+        }
+    }
+
     public Vector2 GetStartAnimPos()
     {
         Vector2 start = GetLowerRectCenter();
@@ -239,7 +266,14 @@ public class TimePointer
 
     private float snapPoint(float xCoord, float snapValue)
     {
-        return (snapValue * Mathf.Round(xCoord / snapValue));
+        if(xCoord < 0)
+        {
+            return (snapValue * Mathf.Round((xCoord - snapValue / 4) / snapValue));
+        }
+        else
+        {
+            return (snapValue * Mathf.Round((xCoord + snapValue / 4) / snapValue));
+        }
     }
 
     private Vector2 snap(Vector2 v, float snapValue)

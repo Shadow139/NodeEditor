@@ -57,6 +57,9 @@ public class NodeWorkView : ViewBaseClass
         GUI.BeginGroup(workSpaceRect);
         GUI.Box(new Rect(0, 0, 10000, 10000), viewTitle, viewSkin.GetStyle("bg_view"));
 
+        float adjustedGridSpacingDark = EditorPreferences.gridSpacingDark / _zoom;
+        float adjustedGridSpacingLight = EditorPreferences.gridSpacingLight / _zoom;
+
         //Draw a Grid
         DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingDark, EditorPreferences.gridColorOuter);
         DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingLight, EditorPreferences.gridColorInner);

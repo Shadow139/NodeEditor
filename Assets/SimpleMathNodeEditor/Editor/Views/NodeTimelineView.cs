@@ -39,7 +39,7 @@ public class NodeTimelineView : ViewBaseClass
                 }
             }
         }
-        
+
         DrawTicks(viewRect, smallTickSpacing, 0.55f, Color.grey, false);
         DrawTicks(viewRect, bigTickSpacing, 0.35f, Color.black, true);
 
@@ -68,7 +68,9 @@ public class NodeTimelineView : ViewBaseClass
                 string str = string.Format("{0:D2}:{1:D2}", 
                         t.Minutes,
                         t.Seconds);
-                Handles.Label(new Vector3((gridSpacing * x) - (gridSpacing * 0.35f), 0f, 0f), str);
+                GUIStyle g = new GUIStyle();
+                g.fontSize = (int)(14f / NodeWorkView._zoom);
+                Handles.Label(new Vector3((gridSpacing * x) - (gridSpacing * 0.2f), 0f, 0f), str,g);
             }
         }
         
@@ -77,16 +79,16 @@ public class NodeTimelineView : ViewBaseClass
 
     private void setTickSpacing()
     {
-        if(NodeWorkView._zoom > 0.5f && NodeWorkView._zoom < 0.75f)
+        if (NodeWorkView._zoom > 0.5f && NodeWorkView._zoom < 0.75f)
         {
             smallTickSpacing = 10f;
-            bigTickSpacing = 50f;
-            NodeBase.snapSize = 25f;
+            bigTickSpacing = 100f;
+            NodeBase.snapSize = 50f;
         }
         else if (NodeWorkView._zoom > 0.75f && NodeWorkView._zoom < 1f)
         {
             smallTickSpacing = 10f;
-            bigTickSpacing = 50f;
+            bigTickSpacing = 100f;
             NodeBase.snapSize = 10f;
         }
         else if (NodeWorkView._zoom > 1f && NodeWorkView._zoom < 1.25f)
@@ -95,6 +97,9 @@ public class NodeTimelineView : ViewBaseClass
             bigTickSpacing = 50f;
             NodeBase.snapSize = 1f;
         }
+
+        //smallTickSpacing = 10f / NodeWorkView._zoom;
+        //bigTickSpacing = 50f / NodeWorkView._zoom;
     }
 
     public void scrollViewRect(float x)

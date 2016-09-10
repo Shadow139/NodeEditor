@@ -198,7 +198,14 @@ public class NodeBase : ScriptableObject
     public virtual void DrawNodeProperties(Rect viewRect, GUISkin guiSkin)
     {
         DrawNodePropertiesByType(viewRect, guiSkin);
+        GUILayout.Space(15);
+
+        EditorGUILayout.LabelField("Star of Animation:", getEndAnimTime());
         GUILayout.Space(6);
+        EditorGUILayout.LabelField("End of Animation :", getStartAnimTime());
+
+
+        GUILayout.Space(10);
         multiInput = EditorGUILayout.Toggle("Multi Input", multiInput);
         GUILayout.Space(6);
         multiOutput = EditorGUILayout.Toggle("Multi Output", multiOutput);
@@ -226,7 +233,7 @@ public class NodeBase : ScriptableObject
             GUILayout.EndVertical();
         }
 
-        EditorGUI.CurveField(new Rect(10, 250, viewRect.width - 20, 250), curve, Color.green, new Rect(0,0,1,1));
+        EditorGUI.CurveField(new Rect(10, 350, viewRect.width - 20, 250), curve, Color.green, new Rect(0,0,1,1));
 
         if (!multiInput)
             resizeInputHandles(numberOfInputs);        
@@ -632,7 +639,7 @@ public class NodeBase : ScriptableObject
         }
     }
     
-    protected void DrawCurrentTimePosition()
+    private void DrawCurrentTimePosition()
     {
         TimeSpan t = TimeSpan.FromMilliseconds((timePointer.GetEndAnimPos().x * 100) - (timePointer.GetStartAnimPos().x * 100));
         string str = string.Format("{0:D2}m:{1:D2}s:{2:D2}ms",
@@ -643,6 +650,27 @@ public class NodeBase : ScriptableObject
         GUI.Label(new Rect(nodeRect.x + nodeRect.width * 0.5f - 65f, nodeRect.y + nodeRect.height - 22f, nodeRect.width, 25f), str, GuiStyles._instance.whiteNodeLabel);
     }
 
+    private string getStartAnimTime()
+    {
+        TimeSpan t = TimeSpan.FromMilliseconds((timePointer.GetEndAnimPos().x * 100));
+        string str = string.Format("{0:D2}m:{1:D2}s:{2:D2}ms",
+                t.Minutes,
+                t.Seconds,
+                t.Milliseconds / 10);
+
+        return str;
+    }
+
+    private string getEndAnimTime()
+    {
+        TimeSpan t = TimeSpan.FromMilliseconds((timePointer.GetStartAnimPos().x * 100));
+        string str = string.Format("{0:D2}m:{1:D2}s:{2:D2}ms",
+                t.Minutes,
+                t.Seconds,
+                t.Milliseconds / 10);
+
+        return str;
+    }
     #endregion
 
     #region Node Updating Methods

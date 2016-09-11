@@ -27,13 +27,13 @@ public class NodePreferenceView : ViewBaseClass
         {
             GUILayout.Space(10f);
 
-            EditorPreferences.gridColorOuter = EditorGUILayout.ColorField("Grid Outer Color", EditorPreferences.gridColorOuter);
+            WorkPreferences.gridColorOuter = EditorGUILayout.ColorField("Grid Outer Color", WorkPreferences.gridColorOuter);
             GUILayout.Space(6f);
-            EditorPreferences.gridColorInner = EditorGUILayout.ColorField("Grid Inner Color", EditorPreferences.gridColorInner);
+            WorkPreferences.gridColorInner = EditorGUILayout.ColorField("Grid Inner Color", WorkPreferences.gridColorInner);
             GUILayout.Space(6f);
-            EditorPreferences.gridSpacingDark = EditorGUILayout.FloatField("Grid Spacing Outer", EditorPreferences.gridSpacingDark);
+            WorkPreferences.gridSpacingDark = EditorGUILayout.FloatField("Grid Spacing Outer", WorkPreferences.gridSpacingDark);
             GUILayout.Space(6f);
-            EditorPreferences.gridSpacingLight = EditorGUILayout.FloatField("Grid Spacing Inner", EditorPreferences.gridSpacingLight);
+            WorkPreferences.gridSpacingLight = EditorGUILayout.FloatField("Grid Spacing Inner", WorkPreferences.gridSpacingLight);
         }
 
         GUILayout.Space(10f);

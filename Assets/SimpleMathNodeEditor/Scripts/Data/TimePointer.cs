@@ -27,12 +27,6 @@ public class TimePointer
 
         startAnimOffset = -100f;
         endAnimOffset = 100f;
-
-        if(parentNode.nodeType == NodeType.Graph)
-        {
-            startAnimOffset = 0;
-            endAnimOffset = 0;
-        }
     }
 
     public void drawArrow(Event e,Rect viewRect, Rect workViewRect, GUISkin guiSkin)

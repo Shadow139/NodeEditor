@@ -57,12 +57,12 @@ public class NodeWorkView : ViewBaseClass
         GUI.BeginGroup(workSpaceRect);
         GUI.Box(new Rect(0, 0, 10000, 10000), viewTitle, viewSkin.GetStyle("bg_view"));
 
-        float adjustedGridSpacingDark = EditorPreferences.gridSpacingDark / _zoom;
-        float adjustedGridSpacingLight = EditorPreferences.gridSpacingLight / _zoom;
+        float adjustedGridSpacingDark = WorkPreferences.gridSpacingDark / _zoom;
+        float adjustedGridSpacingLight = WorkPreferences.gridSpacingLight / _zoom;
 
         //Draw a Grid
-        DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingDark, EditorPreferences.gridColorOuter);
-        DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), EditorPreferences.gridSpacingLight, EditorPreferences.gridColorInner);
+        DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), WorkPreferences.gridSpacingDark, WorkPreferences.gridColorOuter);
+        DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), WorkPreferences.gridSpacingLight, WorkPreferences.gridColorInner);
 
         GUILayout.BeginArea(new Rect(0, 0, 10000, 10000));
 
@@ -157,7 +157,17 @@ public class NodeWorkView : ViewBaseClass
 
         if(e.keyCode == KeyCode.Delete)
         {
-            //TODO Delete Selected Nodes
+            if(currentNodeGraph != null)
+            {
+                if (EditorUtility.DisplayDialog("Delete selected Nodes?",
+            "Are you sure you want to delete " + currentNodeGraph.selectedNodes.Count + " Nodes?", "Delete", "Cancel"))
+                {
+                    foreach (NodeBase n in currentNodeGraph.selectedNodes)
+                    {
+                        NodeUtilities.DeleteNode(n, currentNodeGraph);
+                    }
+                }
+            }
         }
 
         //Limit Panning Outside of Bounds

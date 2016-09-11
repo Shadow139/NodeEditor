@@ -61,8 +61,6 @@ public class NodeBase : ScriptableObject
             tempParameter.stringParam = pair.Value.stringParam;
             tempParameter.vectorParam = new Vector3(pair.Value.vectorParam.x, pair.Value.vectorParam.y, pair.Value.vectorParam.z);
 
-            //parameters.keys.Add(pair.Key);
-            //parameters.values.Add(tempParameter);
             parameters.Add(pair.Key, tempParameter);
         }
 
@@ -125,6 +123,7 @@ public class NodeBase : ScriptableObject
 
                     timePointer.isMoveable = true;
                     timePointer.isSelected = true;
+                    parentGraph.selectedNodes.Add(this);
                 }
             }
 
@@ -134,6 +133,7 @@ public class NodeBase : ScriptableObject
                 {
                     timePointer.resizeStartOffset = true;
                     timePointer.isSelected = true;
+                    parentGraph.selectedNodes.Add(this);
                 }
             }
             if (dragButton.rightButtonRect.Contains(e.mousePosition) && !timePointer.resizeStartOffset && !timePointer.isMoveable)
@@ -142,6 +142,7 @@ public class NodeBase : ScriptableObject
                 {
                     timePointer.resizeEndOffset = true;
                     timePointer.isSelected = true;
+                    parentGraph.selectedNodes.Add(this);
                 }
             }
         }

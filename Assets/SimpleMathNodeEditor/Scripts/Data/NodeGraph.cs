@@ -75,9 +75,12 @@ public class NodeGraph : ScriptableObject
                             }
                             else
                             {
-                                selectedNodes.Remove(node);
-                                node.isSelected = false;
-                                break;
+                                if(e.type == EventType.MouseUp)
+                                {
+                                    selectedNodes.Remove(node);
+                                    node.isSelected = false;
+                                    break;
+                                }
                             }
                         }
                         else

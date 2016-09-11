@@ -41,7 +41,7 @@ public class NodeGraphPopupWindow : EditorWindow
                 NodeGraph newGraph = NodeUtilities.CreateAndSaveGraph(wantedName);
                 node.nodeGraph = newGraph;
                 newGraph.graphNode = node;
-                node.nodeName = wantedName;
+                node.nodeName = "Group Node";
 
                 currentNodePopupWindow.Close();
             }

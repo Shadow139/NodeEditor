@@ -82,9 +82,25 @@ public class NodePreferenceView : ViewBaseClass
             GUILayout.Label("Show Group Node sub Nodes ");
             WorkPreferences.showSubGraph = EditorGUILayout.Toggle("", WorkPreferences.showSubGraph, GUILayout.Width(500));
             GUILayout.EndHorizontal();
-
         }
+
+        GUILayout.Space(50f);
+
+        if (GUILayout.Button("Save"))
+            WorkPreferences.savePreferences();
+
         GUILayout.Space(10f);
+
+        if (GUILayout.Button("Restore Defaults"))
+            WorkPreferences.restoreDefaults();
+
+        GUILayout.Space(10f);
+
+        if (GUILayout.Button("Cancel"))
+        {
+            WorkPreferences.loadPreferences();
+            PreferencesWindow.currentPreferenceWindow.Close();
+        }
 
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();

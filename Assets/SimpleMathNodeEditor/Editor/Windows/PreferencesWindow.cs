@@ -16,6 +16,12 @@ public class PreferencesWindow : EditorWindow
         CreateView();
     }
 
+    void OnEnable()
+    {
+        Debug.Log("Preferences Windows was Enabled.");
+        WorkPreferences.loadPreferences();
+    }
+
     void OnGUI()
     {
         if (currentPreferenceView == null )

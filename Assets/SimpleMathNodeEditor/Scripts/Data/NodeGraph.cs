@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class NodeGraph : ScriptableObject
 {
     public string graphName = "New Graph";
-    public Vector2 mousePos;
+    public Vector2 mousePos;    
     public List<NodeBase> nodes;
     public List<NodeBase> selectedNodes;
     public NodeBase graphNode = null;
@@ -19,6 +19,7 @@ public class NodeGraph : ScriptableObject
     public List<NodeOutput> connectionOutputList;
     public NodeOutput connectionOutput;
 
+    public Rect graphNodeRect;
     public List<Rect> graphInputRects = new List<Rect>();
     int curveIndex = 0;
 
@@ -26,6 +27,13 @@ public class NodeGraph : ScriptableObject
     public float zoom;
     public float panX;
     public float panY;
+
+    //Box select
+    private Vector2 boxSelectPos;
+    private Rect selectionRect;
+    float width = 0;
+    float height = 0;
+    bool selectionFlag = false;
 
     void OnEnable()
     {
@@ -56,6 +64,10 @@ public class NodeGraph : ScriptableObject
         {
             if (e.button == 0 && e.type == EventType.MouseDown && !isInsidePropertyView)
             {
+                boxSelectPos = e.mousePosition;
+                width = 0;
+                height = 0;
+
                 if (!wantsConnection && !e.shift)
                 {
                     DeselectAllNodes();
@@ -65,6 +77,7 @@ public class NodeGraph : ScriptableObject
                 {
                     if (node.nodeRect.Contains(e.mousePosition))
                     {
+                        selectionFlag = true;
                         if (e.shift)
                         {
                             if (!node.isSelected)
@@ -89,6 +102,9 @@ public class NodeGraph : ScriptableObject
                             node.isSelected = true;
                             break;
                         }
+                    }else
+                    {
+                        selectionFlag = false;
                     }
 
                     if (node.timePointer.arrowRect.Contains(e.mousePosition))
@@ -99,7 +115,30 @@ public class NodeGraph : ScriptableObject
                 }
             }
 
-            if(e.control && e.keyCode == KeyCode.A)
+            if (!selectionFlag && !e.shift && e.button == 0 && e.type == EventType.MouseDrag)
+            {
+                ConstructSelectionBox(e);
+            }
+
+            if(e.button == 0 && e.type == EventType.MouseUp)
+            {
+                foreach (NodeBase node in nodes)
+                {
+                    if (selectionRect.Overlaps(node.nodeRect))
+                    {
+                        selectedNodes.Add(node);
+                        node.isSelected = true;
+                    }
+                }
+
+                selectionRect = new Rect();
+                boxSelectPos = new Vector2(0, 0);
+                width = 0;
+                height = 0;
+
+            }
+
+            if (e.control && e.keyCode == KeyCode.A)
             {
                 selectedNodes.Clear();
                 foreach (NodeBase node in nodes)
@@ -111,14 +150,12 @@ public class NodeGraph : ScriptableObject
 
             if(e.keyCode == KeyCode.Tab && e.type == EventType.KeyUp)
             {
-                Debug.Log("align Nodes Horizontally " + selectedNodes.Count);
                 alignNodesHorizontally();
             }
 
-            if (e.keyCode == KeyCode.LeftAlt && e.type == EventType.KeyUp)
+            if (e.control && e.keyCode == KeyCode.Tab && e.type == EventType.KeyUp)
             {
-                Debug.Log("align Nodes Vertically " + selectedNodes.Count);
-                alignNodesVertically();
+                adjustAnimationLength();
             }
 
             if (e.keyCode == KeyCode.Space && e.type == EventType.KeyUp)
@@ -134,27 +171,25 @@ public class NodeGraph : ScriptableObject
 
     private void alignNodesHorizontally()
     {
-        float x = selectedNodes[selectedNodes.Count - 1].nodeRect.center.x;
+        float x = selectedNodes[selectedNodes.Count - 1].timePointer.arrowRect.x;
 
         for(int i = 0; i < selectedNodes.Count; i++)
         {
-            selectedNodes[i].nodeRect.center = new Vector2(x, selectedNodes[i].nodeRect.center.y);
+            selectedNodes[i].timePointer.arrowRect.x = x;
         }
     }
-
-    private void alignNodesVertically()
+    
+    private void adjustAnimationLength()
     {
-        float y = selectedNodes[selectedNodes.Count - 1].nodeRect.y;
+        float startOffset = selectedNodes[selectedNodes.Count - 1].timePointer.startAnimOffset;
+        float endOffset = selectedNodes[selectedNodes.Count - 1].timePointer.endAnimOffset;
 
-        float height = 20f;
-
-        for (int i = 0; i < selectedNodes.Count - 1; i++)
+        for (int i = 0; i < selectedNodes.Count; i++)
         {
-            height += selectedNodes[i].nodeRect.height;
-            selectedNodes[i].nodeRect.position = new Vector2(selectedNodes[i].nodeRect.position.x, y + (height + (20f * i)));
+            selectedNodes[i].timePointer.startAnimOffset = startOffset;
+            selectedNodes[i].timePointer.endAnimOffset = endOffset;
         }
     }
-
     private void DeselectAllNodes()
     {
         nodes.ForEach(node => node.isSelected = false);
@@ -206,6 +241,7 @@ public class NodeGraph : ScriptableObject
         }
 
         DrawNodeToOutputCurve(viewRect);
+        drawSelectionBox();
 
         EditorUtility.SetDirty(this);
     }
@@ -214,11 +250,12 @@ public class NodeGraph : ScriptableObject
     {
         NodeOutput temp = null;
 
-        if(connectionNode == null)
+        if(connectionNode == null && connectionOutputList !=null )
         {
-            temp = connectionOutputList[0];
+            if(connectionOutputList.Count  > 0)
+                temp = connectionOutputList[0];
         }
-        else if(connectionOutputList == null)
+        else if(connectionOutputList == null && connectionNode != null)
         {
             temp = connectionOutput;
         }
@@ -299,8 +336,8 @@ public class NodeGraph : ScriptableObject
                 {
                     Vector3 outputCurvePoint = new Vector3(graphNode.nodeOutputs[i].outputNode.nodeOutputs[0].rect.x + graphNode.nodeOutputs[i].outputNode.nodeOutputs[0].rect.width * 0.5f,
                                                            graphNode.nodeOutputs[i].outputNode.nodeOutputs[0].rect.y + graphNode.nodeOutputs[i].outputNode.nodeOutputs[0].rect.height * 0.5f);
-                    Vector3 inputCurvePoint = new Vector3(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f) + 60f);
-                    DrawUtilities.DrawCurve(outputCurvePoint, inputCurvePoint , Color.black, 2f);
+                    Vector3 inputCurvePoint = new Vector3(graphNodeRect.x, graphNodeRect .y + 60f);
+                    DrawUtilities.DrawCurve(outputCurvePoint, inputCurvePoint , WorkPreferences.nodeCurveColor, WorkPreferences.nodeCurveThickness);
                 }
             }
         }
@@ -318,11 +355,15 @@ public class NodeGraph : ScriptableObject
                 if (GUI.Button(new Rect(viewRect.x, viewRect.y + (viewRect.height * (1f / (graphNode.nodeInputs.Count + 1))) * (i + 1), 32f, 64f), "", guiSkin.GetStyle("node_multiOutput")))
                 {
                     curveIndex = i;
-                    if (graphNode.parentGraph != null)
+                    if (graphNode.parentGraph != null && input != null)
                     {
-                        wantsConnection = true;
-                        connectionNode = input.inputNode;
-                        connectionOutput = input.inputNode.nodeOutputs[input.outputPos];
+                        if(input.inputNode != null)
+                        {
+
+                            wantsConnection = true;
+                            connectionNode = input.inputNode;
+                            connectionOutput = input.inputNode.nodeOutputs[input.outputPos];
+                        }
                     }
                 }
             }
@@ -333,7 +374,13 @@ public class NodeGraph : ScriptableObject
     {
         if (graphNode != null)
         {
-            if (GUI.Button(new Rect(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f), 32f, 120f), "", guiSkin.GetStyle("node_multiInput")))
+            NodeBase mostOuterNode = getMostOuterNode();
+            graphNodeRect = new Rect(viewRect.x + viewRect.width - 32f - panX, viewRect.y + (viewRect.height * 0.5f) - panY, 32f, 120f);
+
+            if (graphNodeRect.x < (mostOuterNode.nodeRect.x + mostOuterNode.nodeRect.width + 100))
+                graphNodeRect.x = mostOuterNode.nodeRect.x + mostOuterNode.nodeRect.width + 100;
+
+            if (GUI.Button(graphNodeRect, "", guiSkin.GetStyle("node_multiInput")))
             {
                 if (wantsConnection)
                 {
@@ -373,7 +420,7 @@ public class NodeGraph : ScriptableObject
                     graphNode.numberOfOutputs = graphNode.nodeOutputs.Count;
                 }
             }
-            GUI.Label(new Rect(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f), 32f, 120f), graphNode.nodeOutputs.Count + "", guiSkin.GetStyle("std_whiteText"));
+            GUI.Label(graphNodeRect, graphNode.nodeOutputs.Count + "", guiSkin.GetStyle("std_whiteText"));
 
         }
     }
@@ -407,6 +454,42 @@ public class NodeGraph : ScriptableObject
         }
         return tmp;
     }
+
+    private NodeBase getMostOuterNode()
+    {
+        NodeBase tmp = null;
+        float max = 0;
+        foreach (NodeBase n in nodes)
+        {
+            if (n.nodeRect.x > max)
+            {
+                max = n.nodeRect.x;
+                tmp = n;
+            }
+        }
+        return tmp;
+    }
+
+    private void ConstructSelectionBox(Event e)
+    {
+        width += e.delta.x;
+        height += e.delta.y;
+
+        selectionRect = new Rect(boxSelectPos, new Vector2(width, height));
+    }
+
+    private void drawSelectionBox()
+    {
+        Texture2D backgroundTexture = Texture2D.whiteTexture;
+        GUIStyle textureStyle = new GUIStyle { normal = new GUIStyleState { background = backgroundTexture } };
+        Color c = new Color(Color.white.r, Color.white.g, Color.white.b, 0.2f);
+
+        var backgroundColor = GUI.backgroundColor;
+        GUI.backgroundColor = c;
+        GUI.Box(selectionRect, GUIContent.none, textureStyle);
+        GUI.backgroundColor = backgroundColor;
+    }
+
 
     public void printGraph(NodeBase node)
     {      

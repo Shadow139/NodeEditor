@@ -278,7 +278,6 @@ public class NodeWorkView : ViewBaseClass
                     NodeGraph graph = NodeUtilities.getSavedNodegraph();
                     currentNode.nodeGraph = graph;
                     graph.graphNode = currentNode;
-                    currentNode.nodeName = graph.graphName;
                     currentNode.InitNodeFromDescriptor(getGroupNodeDescriptor());
                     NodeUtilities.positionNode(currentNode, currentNodeGraph, currentNodeGraph.mousePos);
                     NodeUtilities.saveNode(currentNode, currentNodeGraph);

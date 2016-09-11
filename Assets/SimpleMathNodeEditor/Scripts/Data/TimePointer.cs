@@ -97,19 +97,47 @@ public class TimePointer
         {
             if (e.keyCode == KeyCode.LeftArrow && e.type == EventType.KeyUp)
             {
-                arrowRect.x -= 10f;
+                if (parentNode.nodeType == NodeType.Graph)
+                {
+                    translateGraphNodeInsides(-10f);
+                }
+                else
+                {
+                    arrowRect.x -= 10f;
+                }
             }
             if (e.keyCode == KeyCode.RightArrow && e.type == EventType.KeyUp)
             {
-                arrowRect.x += 10f;
+                if (parentNode.nodeType == NodeType.Graph)
+                {
+                    translateGraphNodeInsides(10f);
+                }
+                else
+                {
+                    arrowRect.x += 10f;
+                }
             }
             if (e.keyCode == KeyCode.DownArrow && e.type == EventType.KeyUp)
             {
-                arrowRect.x -= 1f;
+                if (parentNode.nodeType == NodeType.Graph)
+                {
+                    translateGraphNodeInsides(-1f);
+                }
+                else
+                {
+                    arrowRect.x -= 1f;
+                }
             }
             if (e.keyCode == KeyCode.UpArrow && e.type == EventType.KeyUp)
             {
-                arrowRect.x += 1f;
+                if (parentNode.nodeType == NodeType.Graph)
+                {
+                    translateGraphNodeInsides(1f);
+                }
+                else
+                {
+                    arrowRect.x += 1f;
+                }
             }
         }
 
@@ -179,27 +207,33 @@ public class TimePointer
             NodeBase minNode = null;
             NodeBase maxNode = null;
 
-            foreach (NodeBase n in parentNode.nodeGraph.nodes)
+            if(parentNode.nodeGraph.nodes != null)
             {
-                if ((n.timePointer.x + n.timePointer.startAnimOffset) < min)
+                foreach (NodeBase n in parentNode.nodeGraph.nodes)
                 {
-                    min = n.timePointer.x + n.timePointer.startAnimOffset;
-                    minNode = n;
+                    if ((n.timePointer.x + n.timePointer.startAnimOffset) < min)
+                    {
+                        min = n.timePointer.x + n.timePointer.startAnimOffset;
+                        minNode = n;
+                    }
+                    if ((n.timePointer.x + n.timePointer.endAnimOffset) > max)
+                    {
+                        max = n.timePointer.x + n.timePointer.endAnimOffset;
+                        maxNode = n;
+                    }
                 }
-                if ((n.timePointer.x + n.timePointer.endAnimOffset) > max)
+
+                if(minNode != null && maxNode != null)
                 {
-                    max = n.timePointer.x + n.timePointer.endAnimOffset;
-                    maxNode = n;
+                    Vector2 startVec = minNode.timePointer.GetStartAnimPos();
+                    Vector2 endVec = maxNode.timePointer.GetEndAnimPos();
+                    float midPoint = (startVec.x + endVec.x) / 2f;
+
+                    arrowRect.x = midPoint - arrowRect.width * 0.5f;
+                    startAnimOffset = startVec.x - midPoint;
+                    endAnimOffset = endVec.x - midPoint;
                 }
             }
-
-            Vector2 startVec = minNode.timePointer.GetStartAnimPos();
-            Vector2 endVec = maxNode.timePointer.GetEndAnimPos();
-            float midPoint = (startVec.x + endVec.x) / 2f;
-
-            arrowRect.x = midPoint - arrowRect.width * 0.5f;
-            startAnimOffset = startVec.x - midPoint;
-            endAnimOffset = endVec.x - midPoint;
         }
     }
 

@@ -176,7 +176,7 @@ public class NodeBase : ScriptableObject
             timePointer.isMoveable = false;
             timePointer.resizeStartOffset = false;
             timePointer.resizeEndOffset = false;
-        }
+        }        
     }
 
     public virtual void UpdateNodeGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
@@ -819,6 +819,14 @@ public class NodeBase : ScriptableObject
         }
 
         return col;
+    }
+
+    public void printKeys()
+    {
+        foreach (Keyframe k in curve.keys)
+        {
+            Debug.Log(k.time + " - " + k.value);
+        }
     }
 
     public override string ToString()

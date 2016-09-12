@@ -166,6 +166,17 @@ public class NodeGraph : ScriptableObject
                         printGraph(selectedNodes[0]);
                 }
             }
+
+            if (e.keyCode == KeyCode.K && e.type == EventType.KeyUp)
+            {
+                if (selectedNodes != null)
+                {
+                    foreach(NodeBase n in selectedNodes)
+                    {
+                        n.printKeys();
+                    }
+                }
+            }
         }
     }
 

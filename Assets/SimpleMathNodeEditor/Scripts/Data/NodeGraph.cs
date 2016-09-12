@@ -375,7 +375,10 @@ public class NodeGraph : ScriptableObject
         if (graphNode != null)
         {
             NodeBase mostOuterNode = getMostOuterNode();
-            graphNodeRect = new Rect(viewRect.x + viewRect.width - 32f - panX, viewRect.y + (viewRect.height * 0.5f) - panY, 32f, 120f);
+            graphNodeRect = new Rect(viewRect.x + viewRect.width - 32f, viewRect.y + (viewRect.height * 0.5f) - panY, 32f, 120f);
+            graphNodeRect.x = graphNodeRect.x / zoom;
+            graphNodeRect.x = graphNodeRect.x - panX;
+            graphNodeRect.width = graphNodeRect.width / zoom;
 
             if (graphNodeRect.x < (mostOuterNode.nodeRect.x + mostOuterNode.nodeRect.width + 100))
                 graphNodeRect.x = mostOuterNode.nodeRect.x + mostOuterNode.nodeRect.width + 100;
@@ -493,7 +496,7 @@ public class NodeGraph : ScriptableObject
 
     public void printGraph(NodeBase node)
     {      
-        Debug.Log(node.nodeName + " -> " + node.parameters["value"].floatParam);
+        Debug.Log(node.ToString());
         foreach(NodeOutput child in node.nodeOutputs)
         {
             NodeBase nextNode = child.connectedToNode;

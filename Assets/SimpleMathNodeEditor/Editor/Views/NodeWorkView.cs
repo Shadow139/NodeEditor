@@ -57,9 +57,6 @@ public class NodeWorkView : ViewBaseClass
         GUI.BeginGroup(workSpaceRect);
         GUI.Box(new Rect(0, 0, 10000, 10000), viewTitle, viewSkin.GetStyle("bg_view"));
 
-        float adjustedGridSpacingDark = WorkPreferences.gridSpacingDark / _zoom;
-        float adjustedGridSpacingLight = WorkPreferences.gridSpacingLight / _zoom;
-
         //Draw a Grid
         DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), WorkPreferences.gridSpacingDark, WorkPreferences.gridColorOuter);
         DrawUtilities.DrawGrid(new Rect(0, 0, 10000, 10000), WorkPreferences.gridSpacingLight, WorkPreferences.gridColorInner);
@@ -185,7 +182,7 @@ public class NodeWorkView : ViewBaseClass
         {
             if (currentNodeGraph.graphNode != null)
             {
-                if (GUI.Button(new Rect(viewRect.x + (viewRect.width * 0.5f) - panX, viewRect.y, 250f, 50f), "Step Out"))
+                if (GUI.Button(new Rect(viewRect.x + (viewRect.width * 0.5f) - panX, viewRect.y - panY, 250f, 50f), "Step Out"))
                 {
                     if (currentNodeGraph.graphNode.nodeGraph != null)
                         NodeUtilities.DisplayGraph(currentNodeGraph.graphNode.parentGraph);

@@ -254,8 +254,6 @@ public class TimePointer
 
     private void scaleGraphNodeLeft(float delta)
     {
-        NodeBase tmp = parentNode.nodeGraph.getLastAnimatedNode();
-
         List<NodeBase> SortedList = parentNode.nodeGraph.nodes.OrderByDescending(o => o.timePointer.x).ToList();
         
         for (int i = 0; i < SortedList.Count; i++)
@@ -267,8 +265,6 @@ public class TimePointer
 
     private void scaleGraphNodeRight(float delta)
     {
-        NodeBase tmp = parentNode.nodeGraph.getFirstAnimatedNode();
-
         List<NodeBase> SortedList = parentNode.nodeGraph.nodes.OrderBy(o => o.timePointer.x).ToList();
 
         for (int i = 0; i < SortedList.Count; i++)

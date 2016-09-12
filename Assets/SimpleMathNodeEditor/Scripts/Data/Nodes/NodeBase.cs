@@ -398,17 +398,20 @@ public class NodeBase : ScriptableObject
                 }
                 else
                 {
-                    if (currentInput.inputNode.parentGraph.graphNode.multiOutput && !multiInput)
+                    if(currentInput.inputNode.parentGraph.graphNode != null)
                     {
-                        DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.getMultiOutputRect(), currentInput.rect, WorkPreferences.nodeCurveColor, WorkPreferences.nodeCurveThickness);
-                    }
-                    else if (currentInput.inputNode.parentGraph.graphNode.multiOutput && multiInput)
-                    {
-                        DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.getMultiOutputRect(), getMultiInputRect(), WorkPreferences.nodeCurveColor, WorkPreferences.nodeCurveThickness + currentInput.inputNode.nodeOutputs.Count);
-                    }
-                    else
-                    {
-                        DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeOutputs[currentInput.outputPos].rect, currentInput.rect, WorkPreferences.nodeCurveColor, WorkPreferences.nodeCurveThickness);
+                        if (currentInput.inputNode.parentGraph.graphNode.multiOutput && !multiInput)
+                        {
+                            DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.getMultiOutputRect(), currentInput.rect, WorkPreferences.nodeCurveColor, WorkPreferences.nodeCurveThickness);
+                        }
+                        else if (currentInput.inputNode.parentGraph.graphNode.multiOutput && multiInput)
+                        {
+                            DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.getMultiOutputRect(), getMultiInputRect(), WorkPreferences.nodeCurveColor, WorkPreferences.nodeCurveThickness + currentInput.inputNode.nodeOutputs.Count);
+                        }
+                        else
+                        {
+                            DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeOutputs[currentInput.outputPos].rect, currentInput.rect, WorkPreferences.nodeCurveColor, WorkPreferences.nodeCurveThickness);
+                        }
                     }
                 }
             }
@@ -801,6 +804,11 @@ public class NodeBase : ScriptableObject
         }
 
         return col;
+    }
+
+    public override string ToString()
+    {
+        return nodeName + ": " + nodeType + " - \n" + timePointer.GetStartAnimPos().x * 100+ " - " + timePointer.GetEndAnimPos().x * 100;
     }
 
     #endregion

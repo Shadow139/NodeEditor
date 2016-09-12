@@ -109,6 +109,21 @@ public class NodeBase : ScriptableObject
 
                     nodeRect = rect;
                 }
+
+                if (e.shift && dragButton.middleButtonRect.Contains(e.mousePosition) && !timePointer.resizeEndOffset && !timePointer.resizeStartOffset)
+                {
+                    if (e.button == 0 && e.type == EventType.MouseDown)
+                    {
+                        timePointer.isMoveable = true;
+                        timePointer.isSelected = true;
+
+                        foreach (NodeBase n in parentGraph.selectedNodes)
+                        {
+                            n.timePointer.isMoveable = true;
+                            n.timePointer.isSelected = true;
+                        }
+                    }
+                }
             }
         }
 

@@ -48,8 +48,6 @@ public class NodeEditorWindow : EditorWindow
         if (styles == null)
         {
             styles = new GuiStyles();
-            if (styles.guiSkin == null)
-                styles.GetEditorSkin();
         }
 
         Event e = Event.current;

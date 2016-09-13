@@ -18,6 +18,8 @@ public class WorkPreferences {
     public static float timelineRectOpacity = 0.2f;
     public static bool showSubGraph = true;
 
+    public static bool liveEvaluate = false;
+
     public static void restoreDefaults()
     {
         gridSpacingLight = 10f;
@@ -33,6 +35,8 @@ public class WorkPreferences {
 
         timelineRectOpacity = 0.2f;
         showSubGraph = true;
+
+        liveEvaluate = false;
 
         savePreferences();
     }
@@ -71,6 +75,11 @@ public class WorkPreferences {
             toggle = 0;
         else toggle = 1;
         PlayerPrefs.SetInt("showSubGraph", toggle);
+
+        if (!liveEvaluate)
+            toggle = 0;
+        else toggle = 1;
+        PlayerPrefs.SetInt("liveEvaluate", toggle);
     }
 
     public static void loadPreferences()
@@ -116,6 +125,16 @@ public class WorkPreferences {
             else
             {
                 showSubGraph = false;
+            }
+
+            toggle = PlayerPrefs.GetInt("liveEvaluate");
+            if (toggle == 1)
+            {
+                liveEvaluate = true;
+            }
+            else
+            {
+                liveEvaluate = false;
             }
         }
     }

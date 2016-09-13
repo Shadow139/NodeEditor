@@ -43,6 +43,14 @@ public class NodePropertyView : ViewBaseClass
         NodeWorkView._zoom = EditorGUILayout.Slider(NodeWorkView._zoom, 0.6f, 1.25f);
         GUILayout.EndHorizontal();
 
+        GUILayout.Space(450f);
+
+        if (GUILayout.Button("Evaluate"))
+        {
+            NodeGraph.evaluateTrigger = true;
+            Debug.Log("Evaluate pressed");
+        }
+
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 

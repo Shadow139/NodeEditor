@@ -89,7 +89,7 @@ public class NodeBase : ScriptableObject
 
     public virtual void evaluateNode()
     {
-        EvaluateNodeByType();
+            EvaluateNodeByType();
     }
 
     private void ProcessEvents(Event e, Rect viewRect, Rect workViewRect)
@@ -182,7 +182,9 @@ public class NodeBase : ScriptableObject
     public virtual void UpdateNodeGUI(Event e, Rect viewRect, Rect workViewRect, GUISkin guiSkin)
     {
         ProcessEvents(e, viewRect, workViewRect);
-        evaluateNode();
+        if(WorkPreferences.liveEvaluate)
+            evaluateNode();
+
         viewPortRect = viewRect;
 
         string currentStyle = isSelected ? "node_selected" : "node_default";
@@ -446,7 +448,10 @@ public class NodeBase : ScriptableObject
                 }
                 else
                 {
-                    DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeOutputs[currentInput.outputPos].rect, currentInput.rect, WorkPreferences.nodeCurveColor, WorkPreferences.nodeCurveThickness);
+                    if (currentInput.inputNode.parentGraph.graphNode.nodeOutputs.Count > 0)
+                    {
+                        DrawUtilities.DrawNodeCurve(currentInput.inputNode.parentGraph.graphNode.nodeOutputs[currentInput.outputPos].rect, currentInput.rect, WorkPreferences.nodeCurveColor, WorkPreferences.nodeCurveThickness);
+                    }
                 }
             }
         }

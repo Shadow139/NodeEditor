@@ -8,6 +8,7 @@ public class NodePreferenceView : ViewBaseClass
     bool showGridControls = false;
     bool showNodeControls = false;
     bool showTimelineControls = false;
+    bool showFunctionalityControls = false;
 
     public NodePreferenceView() : base("Preferences") { }
     public override void UpdateView(Rect editorRect, Rect percentageRect, Event e, NodeGraph nodeGraph)
@@ -81,6 +82,19 @@ public class NodePreferenceView : ViewBaseClass
             GUILayout.BeginHorizontal();
             GUILayout.Label("Show Group Node sub Nodes ");
             WorkPreferences.showSubGraph = EditorGUILayout.Toggle("", WorkPreferences.showSubGraph, GUILayout.Width(500));
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.Space(10f);
+
+        showFunctionalityControls = EditorGUILayout.Foldout(showFunctionalityControls, "Show Functionality Settings ");
+        if (showFunctionalityControls)
+        {
+            GUILayout.Space(10f);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Live evaluating Nodes");
+            WorkPreferences.liveEvaluate = EditorGUILayout.Toggle("", WorkPreferences.liveEvaluate, GUILayout.Width(500));
             GUILayout.EndHorizontal();
         }
 

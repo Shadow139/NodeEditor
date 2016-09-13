@@ -18,6 +18,7 @@ public class NodeGraph : ScriptableObject
     public NodeBase connectionNode;
     public List<NodeOutput> connectionOutputList;
     public NodeOutput connectionOutput;
+    public static bool evaluateTrigger = false;
 
     public Rect graphNodeRect;
     public List<Rect> graphInputRects = new List<Rect>();
@@ -33,7 +34,7 @@ public class NodeGraph : ScriptableObject
     private Rect selectionRect;
     float width = 0;
     float height = 0;
-    bool selectionFlag = false;
+    public bool selectionFlag = false;
 
     void OnEnable()
     {
@@ -102,7 +103,8 @@ public class NodeGraph : ScriptableObject
                             node.isSelected = true;
                             break;
                         }
-                    }else
+                    }
+                    else
                     {
                         selectionFlag = false;
                     }
@@ -162,8 +164,9 @@ public class NodeGraph : ScriptableObject
             {
                 if(selectedNodes != null)
                 {
-                    if(selectedNodes.Count > 0)
-                        printGraph(selectedNodes[0]);
+                    if (selectedNodes.Count > 0)
+                        evaluateNodes(selectedNodes[0], null, 0);
+                    //printGraph(selectedNodes[0]);
                 }
             }
 
@@ -245,6 +248,11 @@ public class NodeGraph : ScriptableObject
                 }
             }
        }
+
+        if(evaluateTrigger)
+        {
+            evaluateTrigger = false;
+        }
 
         if (e.type == EventType.Layout && selectedNodes.Count > 0)
         {
@@ -391,8 +399,11 @@ public class NodeGraph : ScriptableObject
             graphNodeRect.x = graphNodeRect.x - panX;
             graphNodeRect.width = graphNodeRect.width / zoom;
 
-            if (graphNodeRect.x < (mostOuterNode.nodeRect.x + mostOuterNode.nodeRect.width + 100))
-                graphNodeRect.x = mostOuterNode.nodeRect.x + mostOuterNode.nodeRect.width + 100;
+            if(mostOuterNode != null)
+            {
+                if (graphNodeRect.x < (mostOuterNode.nodeRect.x + mostOuterNode.nodeRect.width + 100))
+                    graphNodeRect.x = mostOuterNode.nodeRect.x + mostOuterNode.nodeRect.width + 100;
+            }
 
             if (GUI.Button(graphNodeRect, "", guiSkin.GetStyle("node_multiInput")))
             {
@@ -504,11 +515,32 @@ public class NodeGraph : ScriptableObject
         GUI.backgroundColor = backgroundColor;
     }
 
+    private void evaluateNodes(NodeBase startNode, NodeBase lastRecursionNode, int level)
+    {
+        if(level < 8)
+        {
+            foreach (NodeInput parent in startNode.nodeInputs)
+            {
+                NodeBase previousNode = parent.inputNode;
+                if (previousNode != null && previousNode != lastRecursionNode)
+                    evaluateNodes(previousNode, lastRecursionNode, level + 1);
+            }
 
-    public void printGraph(NodeBase node)
+            Debug.Log(startNode.nodeName + startNode.parameters["value"].floatParam);
+
+            foreach (NodeOutput child in startNode.nodeOutputs)
+            {
+                NodeBase nextNode = child.connectedToNode;
+                if (nextNode != null && nextNode != lastRecursionNode)
+                    evaluateNodes(nextNode, startNode, level + 1);
+            }
+        }
+    }
+
+    public void printGraph(NodeBase startNode)
     {      
-        Debug.Log(node.ToString());
-        foreach(NodeOutput child in node.nodeOutputs)
+        Debug.Log(startNode.ToString());
+        foreach(NodeOutput child in startNode.nodeOutputs)
         {
             NodeBase nextNode = child.connectedToNode;
             if(nextNode != null)

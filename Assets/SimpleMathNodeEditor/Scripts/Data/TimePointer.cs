@@ -80,6 +80,7 @@ public class TimePointer
                 if (e.button == 0 && e.type == EventType.MouseDrag)
                 {
                     float delta = snapPoint(e.delta.x, NodeBase.snapSize);
+                    parentNode.parentGraph.selectionFlag = true;
 
                     if (parentNode.nodeType == NodeType.Graph)
                     {
@@ -87,7 +88,7 @@ public class TimePointer
                     }
                     else
                     {
-                        arrowRect.x += delta;
+                       arrowRect.x += delta;
                     }
                 }
             }
@@ -148,6 +149,7 @@ public class TimePointer
                 if (e.button == 0 && e.type == EventType.MouseDrag)
                 {
                     float delta = snapPoint(e.delta.x, NodeBase.snapSize);
+                    parentNode.parentGraph.selectionFlag = true;
 
                     if (parentNode.nodeType == NodeType.Graph)
                     {
@@ -174,6 +176,7 @@ public class TimePointer
                 if (e.button == 0 && e.type == EventType.MouseDrag)
                 {
                     float delta = snapPoint(e.delta.x, NodeBase.snapSize);
+                    parentNode.parentGraph.selectionFlag = true;
 
                     if (parentNode.nodeType == NodeType.Graph)
                     {
@@ -192,6 +195,14 @@ public class TimePointer
             }
         }
 
+        if (arrowRect.x + startAnimOffset < -18)
+        {
+            Debug.Log(arrowRect.x + " offset= " + startAnimOffset);
+            float excessToZero = arrowRect.x + startAnimOffset;
+            arrowRect.x = arrowRect.x - excessToZero;
+            Debug.Log("excess= " + excessToZero);
+        }
+
     }
     private Vector2 GetLowerRectCenter()
     {
@@ -207,31 +218,34 @@ public class TimePointer
             NodeBase minNode = null;
             NodeBase maxNode = null;
 
-            if(parentNode.nodeGraph.nodes != null)
+            if(parentNode.nodeGraph != null)
             {
-                foreach (NodeBase n in parentNode.nodeGraph.nodes)
+                if(parentNode.nodeGraph.nodes != null)
                 {
-                    if ((n.timePointer.x + n.timePointer.startAnimOffset) < min)
+                    foreach (NodeBase n in parentNode.nodeGraph.nodes)
                     {
-                        min = n.timePointer.x + n.timePointer.startAnimOffset;
-                        minNode = n;
+                        if ((n.timePointer.x + n.timePointer.startAnimOffset) < min)
+                        {
+                            min = n.timePointer.x + n.timePointer.startAnimOffset;
+                            minNode = n;
+                        }
+                        if ((n.timePointer.x + n.timePointer.endAnimOffset) > max)
+                        {
+                            max = n.timePointer.x + n.timePointer.endAnimOffset;
+                            maxNode = n;
+                        }
                     }
-                    if ((n.timePointer.x + n.timePointer.endAnimOffset) > max)
+
+                    if(minNode != null && maxNode != null)
                     {
-                        max = n.timePointer.x + n.timePointer.endAnimOffset;
-                        maxNode = n;
+                        Vector2 startVec = minNode.timePointer.GetStartAnimPos();
+                        Vector2 endVec = maxNode.timePointer.GetEndAnimPos();
+                        float midPoint = (startVec.x + endVec.x) / 2f;
+
+                        arrowRect.x = midPoint - arrowRect.width * 0.5f;
+                        startAnimOffset = startVec.x - midPoint;
+                        endAnimOffset = endVec.x - midPoint;
                     }
-                }
-
-                if(minNode != null && maxNode != null)
-                {
-                    Vector2 startVec = minNode.timePointer.GetStartAnimPos();
-                    Vector2 endVec = maxNode.timePointer.GetEndAnimPos();
-                    float midPoint = (startVec.x + endVec.x) / 2f;
-
-                    arrowRect.x = midPoint - arrowRect.width * 0.5f;
-                    startAnimOffset = startVec.x - midPoint;
-                    endAnimOffset = endVec.x - midPoint;
                 }
             }
         }

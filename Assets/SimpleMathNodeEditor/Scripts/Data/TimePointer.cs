@@ -89,6 +89,12 @@ public class TimePointer
                     else
                     {
                        arrowRect.x += delta;
+
+                        if (arrowRect.x + startAnimOffset < -18)
+                        {
+                            float excessToZero = arrowRect.x + startAnimOffset + 18;
+                            arrowRect.x = arrowRect.x - excessToZero;
+                        }
                     }
                 }
             }
@@ -105,6 +111,11 @@ public class TimePointer
                 else
                 {
                     arrowRect.x -= 10f;
+                    if (arrowRect.x + startAnimOffset < -18)
+                    {
+                        float excessToZero = arrowRect.x + startAnimOffset + 18;
+                        arrowRect.x = arrowRect.x - excessToZero;
+                    }
                 }
             }
             if (e.keyCode == KeyCode.RightArrow && e.type == EventType.KeyUp)
@@ -127,6 +138,11 @@ public class TimePointer
                 else
                 {
                     arrowRect.x -= 1f;
+                    if (arrowRect.x + startAnimOffset < -18)
+                    {
+                        float excessToZero = arrowRect.x + startAnimOffset + 18;
+                        arrowRect.x = arrowRect.x - excessToZero;
+                    }
                 }
             }
             if (e.keyCode == KeyCode.UpArrow && e.type == EventType.KeyUp)
@@ -158,6 +174,12 @@ public class TimePointer
                     else
                     {
                         startAnimOffset += delta;
+                    }
+
+                    if (arrowRect.x + startAnimOffset < -18)
+                    {
+                        float excessToZero = arrowRect.x + startAnimOffset + 18;
+                        startAnimOffset = startAnimOffset - excessToZero;
                     }
 
                     if (startAnimOffset > 0)
@@ -194,15 +216,6 @@ public class TimePointer
                 }
             }
         }
-
-        if (arrowRect.x + startAnimOffset < -18)
-        {
-            Debug.Log(arrowRect.x + " offset= " + startAnimOffset);
-            float excessToZero = arrowRect.x + startAnimOffset;
-            arrowRect.x = arrowRect.x - excessToZero;
-            Debug.Log("excess= " + excessToZero);
-        }
-
     }
     private Vector2 GetLowerRectCenter()
     {

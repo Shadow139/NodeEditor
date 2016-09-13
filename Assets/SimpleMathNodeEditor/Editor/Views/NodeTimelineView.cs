@@ -131,7 +131,7 @@ public class NodeTimelineView : ViewBaseClass
 
     private void DrawSubGraphNodes(NodeBase n)
     {
-        if (n.nodeType == NodeType.Graph)
+        if (n.nodeType == NodeType.Graph && n.nodeGraph.nodes != null)
         {
             float space = 20f / n.parentGraph.zoom;
             for(int i = 0; i < n.nodeGraph.nodes.Count; i++)
